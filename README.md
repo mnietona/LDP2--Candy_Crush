@@ -2,5 +2,6 @@
 projet Candy Crush
 
 pour compiler:
-         -- > make 
+        
+        -- > make 
          -- > ./plateau
