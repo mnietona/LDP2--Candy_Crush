@@ -5,3 +5,4 @@ pour compiler:
         
         -- > make 
          -- > ./plateau
+         -- > ./image
