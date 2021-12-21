@@ -3,6 +3,6 @@ projet Candy Crush
 
 
 Pour compiler :
-      -> make
       
+      -> make
       -> candy.out
