@@ -28,6 +28,7 @@ struct Point {
  * Affiche des Box sur l'ecran
  * 
  */
+
 class Plateau: public Fl_Box {
 
  public:
@@ -69,6 +70,7 @@ class Candy : public Fl_PNG_Image{
 Candy::Candy (const char *filename) : Fl_PNG_Image(filename){}
 
 
+
 /**
  * 
  * 
@@ -95,6 +97,7 @@ class Cell {
 
   // Methodes 
   void initialize(); 
+
   void mouseMove(Point mouseLoc);
   void mouseClick(Point mouseLoc);
   void toucher(string color,bool s); // recois une couleur et change la couleur sur l'ecran 
@@ -133,8 +136,10 @@ void Cell::initialize ()
                                                  {"mauve", "image/mauve.png",}};
   
   file_image = &candy_d.find (color)->second[0];
+  
   candy = new Candy(file_image);
   plateau= new Plateau(FL_NO_BOX, center.x, center.y, w, h+10, " ");
+
   plateau->color(fl_rgb_color(214, 214, 214));
   plateau->image(candy);
 
@@ -224,6 +229,7 @@ Point Cell::get_center() const
   return center;
 }
 
+////################
 
 bool Cell::is_neighbor (Cell * cell) const
 {
@@ -250,7 +256,7 @@ void Cell::myNeighbors (Cell *c)
     }
 
 }
-
+//###############
 
 /**
  * 
@@ -270,12 +276,13 @@ class Canvas {
     initialize ();
   }
 
-  void cells_color();
+  void cells_color(); 
   void initialize ();
   void mouseMove(Point mouseLoc);
   void mouseClick(Point mouseLoc);
   void keyPressed(int keyCode);
   void check_image(int x, int y);
+  
   void swap(Cell * c);
   bool check_alligner(Cell c);
   void delete_alligner();
@@ -378,11 +385,13 @@ void Canvas::cells_color(){
     }
   }
 
-   for (int i = 0; i < 9; i++){
-    for (int j = 0; j < 9; j++){
-      check_image(i, j);
+   for (int i = 0; i < 9 ; i++){
+      for (int j = 0; j< 9; j++){
+        bool res = check_alligner(cells[i][j]);
+        delete_alligner();
+      }
     }
-  }
+    
     
   
 }
@@ -417,6 +426,8 @@ void Canvas::initialize ()
   
     
 }
+
+
 
 bool Canvas::check_alligner(Cell c){
 
@@ -488,9 +499,9 @@ void Canvas::delete_alligner(){
       //cells[x_][y_].reposition({1000, 1000});
     }    
   }
-
   horizontally_aligned.clear();
   vertically_aligned.clear(); 
+
 }
 
 void Canvas::move_fruits(){
@@ -511,6 +522,7 @@ void Canvas::move_fruits(){
         }
       }
     }  
+
     cree_voisin();
 
     for (int i = 0; i < 9 ; i++){
@@ -557,6 +569,7 @@ void Canvas::swap(Cell * c){
 
         bool res_1 = check_alligner(cells[i0][j0]);
         delete_alligner();
+       
         bool res_2 = check_alligner(cells[i1][j1]);
         delete_alligner();
 
