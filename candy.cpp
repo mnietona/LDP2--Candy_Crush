@@ -141,6 +141,7 @@ void Cell::initialize ()
 }
 
 void Cell::toucher(string color,bool s) {
+  
   if (s){
   std::map<std::string , std::string> candy_d = {{"bleu", "image/bleu_s.png",},
                                                  {"rouge", "image/rouge_s.png",},
@@ -223,6 +224,7 @@ Point Cell::get_center() const
   return center;
 }
 
+
 bool Cell::is_neighbor (Cell * cell) const
 {
   return find (neighbors.begin(), neighbors.end(), cell) != neighbors.end();
@@ -261,6 +263,7 @@ class Canvas {
   vector<Cell> vertically_aligned;  // liste des allignement vertical
   vector<vector<string> > colors_grid; // Liste de liste de string de couleur
   vector<Cell > fruit;
+  int score = 0;
  public:
   Canvas ()
   {
@@ -277,8 +280,38 @@ class Canvas {
   bool check_alligner(Cell c);
   void delete_alligner();
   void move_fruits();
+  void cree_voisin();
 
 };
+
+
+
+void Canvas::cree_voisin(){
+
+  for (int x = 0; x < 9; x++)
+    for (int y = 0; y < 9; y++)
+    {
+      vector<Cell *> neighbors;
+      for (auto &shift: vector<Point> ({
+                                           {-1, 0}, // The 4 neighbors relative to the cell
+                                           {0, 1},
+                                           {1, 0},
+                                           {0, -1},
+                                       }))
+        {
+          int neighborx = x + shift.x;
+          int neighbory = y + shift.y;
+          if (neighborx >= 0 && // Check if the indicies are in range
+              neighbory >= 0 &&
+              neighborx < static_cast<int>(cells.size ()) &&
+              neighbory < static_cast<int >(cells[neighborx].size ()))
+            neighbors.push_back (&cells[neighborx][neighbory]);
+          cells[x][y].setNeighbors (neighbors);
+        }
+    }
+
+
+}
 
 void Canvas::check_image(int x, int y){
   
@@ -336,22 +369,17 @@ void Canvas::check_image(int x, int y){
 
 void Canvas::cells_color(){
   
-  for (int i = 0; i < 9; i++)
-  {
+  for (int i = 0; i < 9; i++){
     colors_grid.emplace_back ();
-    for (int j = 0; j < 9; j++)
-    {
+    for (int j = 0; j < 9; j++){
       std::vector <string> color_vect {"bleu", "rouge", "orange", "jaune", "vert", "mauve"};
       std::string color = color_vect[rand() % color_vect.size()];
       colors_grid[i].push_back(color);
     }
-    
   }
 
-   for (int i = 0; i < 9; i++)
-  {
-    for (int j = 0; j < 9; j++)
-    {
+   for (int i = 0; i < 9; i++){
+    for (int j = 0; j < 9; j++){
       check_image(i, j);
     }
   }
@@ -373,40 +401,20 @@ void Canvas::initialize ()
         cells[x].push_back ({{x * 80 , y * 80}, 80, 80, color});
       }
   }
+
+  cree_voisin();
+
   //##########################################  CA PRINT SUR TERMINAL 
-  cout<<"\n" << endl;
+  cout << "\n" << endl;
   for (auto item : cells) {
         for (auto i : item) {
             cout << "["<< i.get_color() << "]; ";
         }
         cout<<"\n" << endl;
-    }
-    cout << endl;
+  }
+  cout << endl;
   //##########################################  CA PRINT SUR TERMINAL
   
-  // CEST DANS LE LABO 3 MAIS JSP CA FAIT QUOI
-  // This computes the (pointers to) neighbors of each cell
-  for (int x = 0; x < 9; x++)
-    for (int y = 0; y < 9; y++)
-    {
-      vector<Cell *> neighbors;
-      for (auto &shift: vector<Point> ({
-                                           {-1, 0}, // The 4 neighbors relative to the cell
-                                           {0, 1},
-                                           {1, 0},
-                                           {0, -1},
-                                       }))
-        {
-          int neighborx = x + shift.x;
-          int neighbory = y + shift.y;
-          if (neighborx >= 0 && // Check if the indicies are in range
-              neighbory >= 0 &&
-              neighborx < static_cast<int>(cells.size ()) &&
-              neighbory < static_cast<int >(cells[neighborx].size ()))
-            neighbors.push_back (&cells[neighborx][neighbory]);
-          cells[x][y].setNeighbors (neighbors);
-        }
-    }
     
 }
 
@@ -457,22 +465,22 @@ bool Canvas::check_alligner(Cell c){
   
 }
 
-
 void Canvas::delete_alligner(){
 
-  if (horizontally_aligned.size() >= 3)   // vertical
-  {
+  if (horizontally_aligned.size() >= 3){ 
+    
+       score += 1;
+   
     for (int x = 0; x < horizontally_aligned.size(); x++){
       int x_ = horizontally_aligned[x].get_center().x/80;
       int y_ = horizontally_aligned[x].get_center().y/80;
       cells[x_][y_].set_color("vide");
       //cells[x_][y_].reposition({1000, 1000});
     }
-
   }
 
-  if (vertically_aligned.size() >= 3)
-  { 
+  if (vertically_aligned.size() >= 3){ 
+    score +=1;
     for (int x = 0; x < vertically_aligned.size(); x++){
       int x_ = vertically_aligned[x].get_center().x/80;
       int y_ = vertically_aligned[x].get_center().y/80;
@@ -480,9 +488,9 @@ void Canvas::delete_alligner(){
       //cells[x_][y_].reposition({1000, 1000});
     }    
   }
+
   horizontally_aligned.clear();
-  vertically_aligned.clear();
-  
+  vertically_aligned.clear(); 
 }
 
 void Canvas::move_fruits(){
@@ -502,11 +510,18 @@ void Canvas::move_fruits(){
           }
         }
       }
+    }  
+    cree_voisin();
+
+    for (int i = 0; i < 9 ; i++){
+      for (int j = 0; j< 9; j++){
+        bool res = check_alligner(cells[i][j]);
+        delete_alligner();
+      }
     }
-  
+    
   
 }
-
 
 void Canvas::swap(Cell * c){
    
@@ -539,21 +554,22 @@ void Canvas::swap(Cell * c){
         Cell sauv = cells[i1][j1];
         cells[i1][j1] = cells[i0][j0];
         cells[i0][j0] = sauv;
-        
-    
+
         bool res_1 = check_alligner(cells[i0][j0]);
         delete_alligner();
         bool res_2 = check_alligner(cells[i1][j1]);
         delete_alligner();
 
-        for (int i = 0; i < 81 ;i++){
+        for (int i = 0; i < 100 ;i++){
           move_fruits();
         }
+
+        cout << "score : " << score << endl;
         
 
         if (!res_1 && !res_2){
 
-          cout << "NNOOOOOOOON" << endl;
+          cout << "DEPLACEMENT SERT A RIEN" << endl;
 
           Cell sauv = cells[i0][j0];
           cells[i0][j0] = cells[i1][j1];
@@ -585,12 +601,17 @@ void Canvas::swap(Cell * c){
 
     }
     else if ((selected.size() == 2) && (!selected[0]->is_neighbor (selected[1]))){
-      cout << "IIICCCCCCCCCIIII" << endl;
+      cout << "PAAAS VOISIN" << endl;
 
       selected.clear();
       selected.push_back (c);
     }
 }
+
+
+
+
+
 
 
 
@@ -600,6 +621,7 @@ void Canvas::mouseMove(Point mouseLoc) {
       c.mouseMove(mouseLoc);
 }
 
+
 void Canvas::mouseClick(Point mouseLoc) {
   for (auto &v: cells)
     for (auto &c: v){
@@ -608,6 +630,7 @@ void Canvas::mouseClick(Point mouseLoc) {
     }
 
 }
+
 
 void Canvas::keyPressed(int keyCode) {
   switch (keyCode) {
