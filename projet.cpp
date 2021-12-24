@@ -100,7 +100,7 @@ class Cell {
     vector<Cell *> neighbors;
     char *image;
     
-    map<int,string> liste_bombon = {{1, "image/bleu.png",},{2, "image/rouge.png",},
+    map<int,string> liste_bombon = {{0, "image/explosion.png",},{1, "image/bleu.png",},{2, "image/rouge.png",},
                                {3, "image/vert.png",},{4, "image/jaune.png",},
                                {5, "image/orange.png",},{6, "image/mauve.png",}};
 
@@ -111,17 +111,16 @@ class Cell {
 
   // Methodes 
   void cree_bombon();  // fonction repreise sur github
-  void deplace(Point d);
-  void toucher(int fruit,bool s);
-  void mouseMove(Point mouseLoc);
-  void mouseClick(Point mouseLoc);
-  int get_color();
+  void deplace(Point d); // redessine le bombom a x et y 
+  void toucher(int fruit,bool s); // animation lors du survelement de la souris sur bombon
+  void mouseMove(Point mouseLoc); // la souris se deplace 
+  void mouseClick(Point mouseLoc); // la souris clique 
+  int get_color(); // renvoi la couleur du bombon
   void set_color(int new_fruit); // donne une nouvelle couleur 
   void set_center(Point new_center);  // donne un nouveau x et y au bombon
   bool est_selectionner() const; // renvoi la valeur de select
   void deselectionner();  // met selecter a faux 
   Point get_center() const; // renvoi le x et y du bombon
-
   
  
 };
@@ -144,7 +143,7 @@ void Cell::cree_bombon(){
 void Cell::toucher(int fruit,bool s) {
   
   if (s){
-      map<int ,string> liste_t_bombon = {{1, "image/bleu_s.png",},{2, "image/rouge_s.png",},
+      map<int ,string> liste_t_bombon = {{0, "image/explosion.png",},{1, "image/bleu_s.png",},{2, "image/rouge_s.png",},
                                         {3, "image/vert_s.png",},{4, "image/jaune_s.png",},
                                         {5, "image/orange_s.png",},{6, "image/mauve_s.png",}};
       image = &liste_t_bombon.find (fruit)->second[0];
@@ -228,23 +227,23 @@ class Canvas {
 
 
   void cree_plateau(); // initilaise le plateau
-  void mouseMove(Point mouseLoc);
-  void mouseClick(Point mouseLoc);
-  void keyPressed(int keyCode);
-  bool debut_check_horizontal();
-  bool debut_check_vertical();
-  void print();
+  void mouseMove(Point mouseLoc); // VIENS DU TP
+  void mouseClick(Point mouseLoc); // VIENS DU TP
+  void keyPressed(int keyCode); // VIENS DU TP
+  bool debut_check_horizontal(); // verifie si allignement au lancement du jeu
+  bool debut_check_vertical();  // verifie si allignement au lancement du jeu
+  void print(); // print le jeu sur terminal
+  bool a_coter(int x0, int y0, int x1, int y1); // verifie si les 2 bombon son l'un a coter de l'autre
+  void change_2_bombon(int x0, int y0, int x1, int y1); // chnage  la position du bombon dasn le jeux 
+  void efface(); // efface les allignement de bombon
+  void deplacement(Cell *c); // deplace le bombon si possible 
+  bool alligner_horizontal(Cell c); // verifie allignement horizontal et ajoute les bombon alligner dans une liste 
+  bool alligner_vertical(Cell c); // verifie allignement vertical et ajute dasn une liste les bombon alligner 
+  bool alligner(Cell c); // verifie allignement total
+  void echange_bonbon(vector<Cell *> &liste); // change le deplacement du bombon sur l'interface 
+  void tomber_fruits(); // fait tomber les fruit lor d'une surpression
+  bool verifie_pas_0(); // verifie qu'il n'y a plus de case vide 
 
-  bool a_coter(int x0, int y0, int x1, int y1);
-  void change_2_bombon(int x0, int y0, int x1, int y1);
-  void efface();
-  void deplacement(Cell *c);
-  bool alligner_horizontal(Cell c);
-  bool alligner_vertical(Cell c);
-  bool alligner(Cell c);
-  void echange_bonbon(vector<Cell *> &liste);
-  void tomber_fruits();
-  bool verifie_pas_0();
   };
 
 
@@ -353,11 +352,13 @@ bool Canvas:: a_coter(int x0, int y0, int x1, int y1){
 }
 
 void Canvas::efface(){
+    // VIOR SI ON PEUX CHANGER 
     if (vertical.size() >= 3){
         for (int i = 0; i < vertical.size(); i++){
             int x = vertical[i].get_center().x/80;
             int y = vertical[i].get_center().y/80;
             cells[x][y].set_color(0);
+            cells[x][y].deplace({x * 80,y*80});
         }
     }
 
@@ -366,6 +367,7 @@ void Canvas::efface(){
             int x = horizontal[i].get_center().x/80;
             int y = horizontal[i].get_center().y/80;
             cells[x][y].set_color(0);
+            cells[x][y].deplace({x*80,y*80});
         }
     }
 
@@ -476,7 +478,7 @@ void Canvas::deplacement(Cell *c){
             efface();
             bool res_1 = alligner(cells[x1][y1]);
             efface();
-
+            
             while(!verifie_pas_0()){
                 tomber_fruits();
             }
@@ -534,13 +536,11 @@ void Canvas::tomber_fruits(){
     }
 }
 
-
 void Canvas::mouseMove(Point mouseLoc) {
   for (auto &v: cells)
     for (auto &c: v)
       c.mouseMove(mouseLoc);
 }
-
 
 void Canvas::mouseClick(Point mouseLoc) {
   for (auto &v: cells)
@@ -551,7 +551,6 @@ void Canvas::mouseClick(Point mouseLoc) {
 
 }
 
-
 void Canvas::keyPressed(int keyCode) {
   switch (keyCode) {
     case 'a': 
@@ -561,6 +560,9 @@ void Canvas::keyPressed(int keyCode) {
         exit(0);
   }
 }
+
+
+
 
 
 
