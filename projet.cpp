@@ -226,11 +226,11 @@ class Canvas {
  public:
   Canvas ()
   {
-    cree_plateau();
+    cree_plateau(2);
   }
 
 
-  void cree_plateau(); // initilaise le plateau
+  void cree_plateau(int niveau); // initilaise le plateau
   void mouseMove(Point mouseLoc); // VIENS DU TP
   void mouseClick(Point mouseLoc); // VIENS DU TP
   void keyPressed(int keyCode); // VIENS DU TP
@@ -259,13 +259,10 @@ void Canvas::lire_fichier(){
     int i = 0;
     while( fruit != 100) {
         fichier >> fruit;
-        cout << fruit << endl;
         couleur_fichier.push_back(fruit);
     
     }
 
-
-    cout << couleur_fichier.size() << endl;
     int x = 0;
     for (int i = 0; i < 9; i++){
         couleur.emplace_back ();
@@ -327,17 +324,24 @@ bool Canvas::debut_check_vertical(){
    return vertical;
 }
 
-void Canvas::cree_plateau(){ 
-/*
-    for (int i = 0; i < 9; i++){
+void Canvas::cree_plateau(int niveau){ 
+
+  switch(niveau){
+    case 1:
+      for (int i = 0; i < 9; i++){
         couleur.emplace_back ();
         for (int j = 0; j < 9; j++){
             int fruit = rand() %(6-1) + 1;
             couleur[i].push_back(fruit);
         }
-    }
-*/
-lire_fichier();
+      }
+      break;
+    case 2:
+       lire_fichier();
+       break;
+
+}
+    
   // boucle tant que 3 allignement
   do{
       debut_check_horizontal();
@@ -587,7 +591,7 @@ void Canvas::mouseClick(Point mouseLoc) {
 void Canvas::keyPressed(int keyCode) {
   switch (keyCode) {
     case 'a': 
-        cree_plateau();
+        cree_plateau(1);
         break;
     case 'q':
         exit(0);
