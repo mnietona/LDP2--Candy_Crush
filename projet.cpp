@@ -121,7 +121,7 @@ class Cell {
   bool est_selectionner() const; // renvoi la valeur de select
   void deselectionner();  // met selecter a faux 
   Point get_center() const; // renvoi le x et y du bombon
-  void setNeighbors (const vector<Cell *> &newNeighbors); // donne un nouveau voisin
+
   
  
 };
@@ -206,11 +206,6 @@ Point Cell::get_center() const{
   return center;
 }
 
-void Cell::setNeighbors (const vector<Cell *> &newNeighbors){
-  neighbors = newNeighbors;
-}
-
-
 
 
 
@@ -231,7 +226,7 @@ class Canvas {
     cree_plateau();
   }
 
-  void cree_voisin(); // Cree 4 voisins d'une cellules
+
   void cree_plateau(); // initilaise le plateau
   void mouseMove(Point mouseLoc);
   void mouseClick(Point mouseLoc);
@@ -239,7 +234,6 @@ class Canvas {
   bool debut_check_horizontal();
   bool debut_check_vertical();
   void print();
-  //void donne_couleur();
 
   bool a_coter(int x0, int y0, int x1, int y1);
   void change_2_bombon(int x0, int y0, int x1, int y1);
@@ -253,19 +247,6 @@ class Canvas {
   bool verifie_pas_0();
   };
 
-
-/*
-void donne_couleur(){
-    
-    for (int i = 0; i < 9; i++){
-        couleur.emplace_back ();
-        for (int j = 0; j < 9; j++){
-            int fruit = rand() %(6-1) + 1;
-            couleur[i].push_back(fruit);
-        }
-    }
-}
-*/
 
 
 void Canvas::print(){
@@ -316,32 +297,6 @@ bool Canvas::debut_check_vertical(){
    }
    return vertical;
 }
-/*
-void Canvas::cree_voisin(){
-    
-    // Viens du labo3 solution 
-  for (int x = 0; x < 9; x++)
-    for (int y = 0; y < 9; y++)
-    {
-      vector<Cell *> neighbors;
-      for (auto &shift: vector<Point> ({{-1, 0}, {0, 1}, {1, 0}, {0, -1},}))
-      {
-          int neighborx = x + shift.x;
-          int neighbory = y + shift.y;
-          
-          if (neighborx >= 0 && neighbory >= 0 &&
-              neighborx < static_cast<int>(cells.size ()) &&
-              neighbory < static_cast<int >(cells[neighborx].size ()))
-            {
-                neighbors.push_back (&cells[neighborx][neighbory]);
-            }
-          cells[x][y].setNeighbors (neighbors);
-        }
-    }
-
-
-}
-*/
 
 void Canvas::cree_plateau(){ 
 
@@ -532,7 +487,7 @@ void Canvas::deplacement(Cell *c){
             }
             liste.clear();
             print();
-            
+
         }else{
             liste.clear();
             liste.push_back(c);
