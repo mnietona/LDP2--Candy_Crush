@@ -23,6 +23,10 @@
 #include <iostream>
 #include <string.h>
 #include <algorithm>
+#include <fstream>
+
+#include <stdio.h>								
+#include <stdlib.h>	
 
 using namespace std;
 
@@ -101,8 +105,8 @@ class Cell {
     char *image;
     
     map<int,string> liste_bombon = {{0, "image/explosion.png",},{1, "image/bleu.png",},{2, "image/rouge.png",},
-                               {3, "image/vert.png",},{4, "image/jaune.png",},
-                               {5, "image/orange.png",},{6, "image/mauve.png",}};
+                               {3, "image/vert.png",},{4, "image/jaune.png",},{5, "image/orange.png",},
+                               {6, "image/mauve.png",},{7,"image/mur.png",}};
 
 
  public:
@@ -145,7 +149,7 @@ void Cell::toucher(int fruit,bool s) {
   if (s){
       map<int ,string> liste_t_bombon = {{0, "image/explosion.png",},{1, "image/bleu_s.png",},{2, "image/rouge_s.png",},
                                         {3, "image/vert_s.png",},{4, "image/jaune_s.png",},
-                                        {5, "image/orange_s.png",},{6, "image/mauve_s.png",}};
+                                        {5, "image/orange_s.png",},{6, "image/mauve_s.png",},{7,"image/mur.png",}};
       image = &liste_t_bombon.find (fruit)->second[0];
       candy = new Candy(image);
       plateau->image(candy);
@@ -243,17 +247,43 @@ class Canvas {
   void echange_bonbon(vector<Cell *> &liste); // change le deplacement du bombon sur l'interface 
   void tomber_fruits(); // fait tomber les fruit lor d'une surpression
   bool verifie_pas_0(); // verifie qu'il n'y a plus de case vide 
-
+  void lire_fichier();
   };
 
 
+void Canvas::lire_fichier(){
+    
+    ifstream fichier("mur.txt");
+    vector<int> couleur_fichier;
+    int fruit;
+    int i = 0;
+    while( fruit != 100) {
+        fichier >> fruit;
+        cout << fruit << endl;
+        couleur_fichier.push_back(fruit);
+    
+    }
+
+
+    cout << couleur_fichier.size() << endl;
+    int x = 0;
+    for (int i = 0; i < 9; i++){
+        couleur.emplace_back ();
+        for (int j = 0; j < 9; j++){
+            couleur[i].push_back(couleur_fichier[x]);
+            x++;
+        }
+
+    }
+
+}
 
 void Canvas::print(){
 
   cout << "\n" << endl;
   for (int i = 0; i < 9; i++){
     for (int j = 0; j < 9; j++){
-            cout << "["<< cells[j][i].get_color() << "]; ";
+            cout<<"[" << cells[j][i].get_color() << "]; ";
         }
         cout<<"\n" << endl;
   }
@@ -298,7 +328,7 @@ bool Canvas::debut_check_vertical(){
 }
 
 void Canvas::cree_plateau(){ 
-
+/*
     for (int i = 0; i < 9; i++){
         couleur.emplace_back ();
         for (int j = 0; j < 9; j++){
@@ -306,7 +336,8 @@ void Canvas::cree_plateau(){
             couleur[i].push_back(fruit);
         }
     }
-
+*/
+lire_fichier();
   // boucle tant que 3 allignement
   do{
       debut_check_horizontal();
@@ -478,6 +509,8 @@ void Canvas::deplacement(Cell *c){
             efface();
             bool res_1 = alligner(cells[x1][y1]);
             efface();
+
+
             
             while(!verifie_pas_0()){
                 tomber_fruits();
@@ -515,7 +548,7 @@ void Canvas::tomber_fruits(){
 
     for (int i = 0; i < 9 ; i++){
       for (int j = 0; j< 9; j++){
-
+          
         if (cells[i][j].get_color() == 0){
           if (j==0){
               int fruit = rand() %(6-1) + 1;
