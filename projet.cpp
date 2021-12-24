@@ -222,6 +222,8 @@ class Canvas {
   vector< vector<Cell> > cells;
   vector<vector<int> > couleur;
   vector<Cell *> liste;
+  vector<Cell > horizontal;
+  vector<Cell > vertical;
   
  public:
   Canvas ()
@@ -243,7 +245,12 @@ class Canvas {
   void change_2_bombon(int x0, int y0, int x1, int y1);
   void efface();
   void deplacement(Cell *c);
+  bool alligner_horizontal(Cell c);
+  bool alligner_vertical(Cell c);
   bool alligner(Cell c);
+  void echange_bonbon(vector<Cell *> &liste);
+  void tomber_fruits();
+  bool verifie_pas_0();
   };
 
 
@@ -259,6 +266,7 @@ void donne_couleur(){
     }
 }
 */
+
 
 void Canvas::print(){
 
@@ -308,7 +316,7 @@ bool Canvas::debut_check_vertical(){
    }
    return vertical;
 }
-
+/*
 void Canvas::cree_voisin(){
     
     // Viens du labo3 solution 
@@ -333,6 +341,7 @@ void Canvas::cree_voisin(){
 
 
 }
+*/
 
 void Canvas::cree_plateau(){ 
 
@@ -343,7 +352,6 @@ void Canvas::cree_plateau(){
             couleur[i].push_back(fruit);
         }
     }
-
 
   // boucle tant que 3 allignement
   do{
@@ -389,23 +397,103 @@ bool Canvas:: a_coter(int x0, int y0, int x1, int y1){
     return coter;
 }
 
-void Canvas:: efface(){
+void Canvas::efface(){
+    if (vertical.size() >= 3){
+        for (int i = 0; i < vertical.size(); i++){
+            int x = vertical[i].get_center().x/80;
+            int y = vertical[i].get_center().y/80;
+            cells[x][y].set_color(0);
+        }
+    }
 
-    // TODO pour delete case
+    if (horizontal.size() >= 3){
+        for (int i = 0; i < horizontal.size(); i++){
+            int x = horizontal[i].get_center().x/80;
+            int y = horizontal[i].get_center().y/80;
+            cells[x][y].set_color(0);
+        }
+    }
+
+    horizontal.clear();
+    vertical.clear();
+
+}
+
+bool Canvas::alligner_horizontal(Cell c){
+
+    int x = c.get_center().x/80;
+    int y = c.get_center().y/80;
+
+    // #### HORIZONTAL 
+    horizontal.push_back(c);
+    // horizontal droite
+    x++;
+    while (x < 9 && cells[x][y].get_color() == c.get_color()){
+        horizontal.push_back(cells[x][y]);
+        x++;
+    }
+
+    // horizontal gauche
+    x = c.get_center().x/80;
+    x--;
+    while (x >= 0 && cells[x][y].get_color() == c.get_color()){
+        horizontal.push_back(cells[x][y]);
+        x--;
+    }
+
+    return horizontal.size() >= 3;
+}
+
+bool Canvas::alligner_vertical(Cell c){
+
+    int x = c.get_center().x/80;
+    int y = c.get_center().y/80;
+
+    // #### VERTICAL 
+    vertical.push_back(c);
+    // vertical bas
+    y++;
+    while (y < 9 && cells[x][y].get_color() == c.get_color()){
+        vertical.push_back(cells[x][y]);
+        y++;
+    }
+
+    // vertical haut
+    y = c.get_center().y/80;
+    y--;
+    while (y >= 0 && cells[x][y].get_color() == c.get_color()){
+        vertical.push_back(cells[x][y]);
+        y--;
+    }
+
+    return vertical.size() >= 3;   
 }
 
 bool Canvas::alligner(Cell c){
+    
+    bool res_h = alligner_horizontal(c);
+    bool res_v = alligner_vertical(c);
 
-    // TODO verifie si case alligner 
-  
+    return res_v || res_h;
+
 }
-
 
 void Canvas::change_2_bombon(int x0, int y0, int x1, int y1){
     
     Cell sauve = cells[x0][y0];
     cells[x0][y0] = cells[x1][y1];
     cells[x1][y1] = sauve;
+}
+
+void Canvas::echange_bonbon(vector<Cell *> &liste){
+   
+    Point save_center{liste[0]->get_center().x, liste[0]->get_center().y};
+            
+    liste[0]->deplace(liste[1]->get_center());
+    liste[0]->set_center(liste[1]->get_center());
+            
+    liste[1]->deplace(save_center);
+    liste[1]->set_center(save_center);
 }
 
 void Canvas::deplacement(Cell *c){
@@ -422,37 +510,74 @@ void Canvas::deplacement(Cell *c){
 
         int x1 = liste[1]->get_center().x/80;
         int y1 = liste[1]->get_center().y/80;
-        cout << x0 << y0 << " " << x1 << y1 << endl;
         
         if (a_coter(x0, y0, x1, y1)){
 
             change_2_bombon(x0, y0, x1, y1); // change bombom sur le terminal 
             
-            // change bombon sur FLTK
-            Point save_center{liste[0]->get_center().x, liste[0]->get_center().y};
-            liste[0]->deplace(liste[1]->get_center());
-            liste[0]->set_center(liste[1]->get_center());
-            liste[1]->deplace(save_center);
-            liste[1]->set_center(save_center);
-                
+            echange_bonbon(liste); // change bombon FLTK
+            
+            bool res = alligner(cells[x0][y0]);
+            efface();
+            bool res_1 = alligner(cells[x1][y1]);
+            efface();
 
-            print();
+            while(!verifie_pas_0()){
+                tomber_fruits();
+            }
 
+            if (!res && !res_1){
+                change_2_bombon(x1, y1, x0, y0);
+                echange_bonbon(liste);
+            }
             liste.clear();
-        
-        }
-        else{
-            cout <<"pas frere"<< endl;
+            print();
+            
+        }else{
             liste.clear();
             liste.push_back(c);
         }
-        
-
     }
-
+    
 }
 
+bool Canvas::verifie_pas_0(){
+    bool res = true;
+    
+    for (int i = 0; i < 9 ; i++){
+      for (int j = 0; j< 9; j++){
+          if ( cells[i][j].get_color() == 0){
+              res = false;
+          } 
+      }
+    }
+    return res;
+}
 
+void Canvas::tomber_fruits(){
+
+    for (int i = 0; i < 9 ; i++){
+      for (int j = 0; j< 9; j++){
+
+        if (cells[i][j].get_color() == 0){
+          if (j==0){
+              int fruit = rand() %(6-1) + 1;
+              cells[i][j].set_color(fruit);
+          }else{
+              cells[i][j].set_color(cells[i][j-1].get_color());
+              cells[i][j-1].set_color(0);
+          }
+        }
+      }
+    }  
+
+   for (int i = 0; i < 9 ; i++){
+      for (int j = 0; j< 9; j++){
+        bool res = alligner(cells[i][j]);
+        efface();
+      } 
+    }
+}
 
 
 void Canvas::mouseMove(Point mouseLoc) {
