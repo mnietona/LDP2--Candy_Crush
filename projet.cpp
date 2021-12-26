@@ -241,19 +241,21 @@ class Canvas {
   void change_2_bombon(int x0, int y0, int x1, int y1); // chnage  la position du bombon dasn le jeux 
   void efface(); // efface les allignement de bombon
   void deplacement(Cell *c); // deplace le bombon si possible 
-  bool alligner_horizontal(Cell c); // verifie allignement horizontal et ajoute les bombon alligner dans une liste 
-  bool alligner_vertical(Cell c); // verifie allignement vertical et ajute dasn une liste les bombon alligner 
+  bool alligner_horizontal(Cell horizontal); // verifie allignement horizontal et ajoute les bombon alligner dans une liste 
+  bool alligner_vertical(Cell vertical); // verifie allignement vertical et ajute dasn une liste les bombon alligner 
   bool alligner(Cell c); // verifie allignement total
   void echange_bonbon(vector<Cell *> &liste); // change le deplacement du bombon sur l'interface 
   void tomber_fruits(); // fait tomber les fruit lor d'une surpression
   bool verifie_pas_0(); // verifie qu'il n'y a plus de case vide 
-  void lire_fichier();
+  void lire_fichier(); // prend un fichier pour construire plateau
+  bool verif_mur(int x0,int y0,int x1,int y1); // vérifie si c'est un mur
+  bool verifie_mouvement_possible(); // vérifie si il y a des mouvements possible 
   };
 
 
 void Canvas::lire_fichier(){
     
-    ifstream fichier("mur.txt");
+    ifstream fichier("test.txt");
     vector<int> couleur_fichier;
     int fruit;
     int i = 0;
@@ -339,7 +341,6 @@ void Canvas::cree_plateau(int niveau){
     case 2:
        lire_fichier();
        break;
-
 }
     
   // boucle tant que 3 allignement
@@ -470,6 +471,13 @@ bool Canvas::alligner(Cell c){
 
 }
 
+bool Canvas::verif_mur(int x0,int y0,int x1,int y1){
+  bool res=false;
+  if (cells[x0][y0].get_color()==7 || cells[x1][y1].get_color()==7){
+    res=true;
+  }return res;
+}
+
 void Canvas::change_2_bombon(int x0, int y0, int x1, int y1){
     
     Cell sauve = cells[x0][y0];
@@ -494,6 +502,10 @@ void Canvas::deplacement(Cell *c){
        liste.push_back(c);
        c->deselectionner();
     }
+    if (!verifie_mouvement_possible()){
+      cout<< "plus de mouvement possible";
+      cree_plateau(1);
+    }
 
     if (liste.size() == 2){
        
@@ -503,7 +515,7 @@ void Canvas::deplacement(Cell *c){
         int x1 = liste[1]->get_center().x/80;
         int y1 = liste[1]->get_center().y/80;
         
-        if (a_coter(x0, y0, x1, y1)){
+        if (a_coter(x0, y0, x1, y1) && !verif_mur(x0, y0, x1, y1)){
 
             change_2_bombon(x0, y0, x1, y1); // change bombom sur le terminal 
             
@@ -516,7 +528,7 @@ void Canvas::deplacement(Cell *c){
 
 
             
-            while(!verifie_pas_0()){
+           while(!verifie_pas_0()){
                 tomber_fruits();
             }
 
@@ -558,8 +570,17 @@ void Canvas::tomber_fruits(){
               int fruit = rand() %(6-1) + 1;
               cells[i][j].set_color(fruit);
           }else{
+            // vérifie si c'est un mur 
+            if (cells[i][j-1].get_color()==7){
+              // déplace en diagonal si c'est un mur 
+              cells[i][j].set_color(cells[i-1][j-1].get_color());
+              cells[i-1][j-1].set_color(cells[i][j-2].get_color());
+              cells[i][j-2].set_color(0);
+      
+            }else{
               cells[i][j].set_color(cells[i][j-1].get_color());
               cells[i][j-1].set_color(0);
+            }
           }
         }
       }
@@ -598,6 +619,26 @@ void Canvas::keyPressed(int keyCode) {
   }
 }
 
+bool Canvas::verifie_mouvement_possible(){
+  // vérifie si il y a un mouvement possible sur les diagonales.
+  bool move_possible=false;
+  for (int i = 1; i < 8; i++){
+      for (int j = 1; j< 8; j++){
+        if(cells[i][j].get_color() == cells[i+1][j+1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
+          move_possible=true;
+       }
+        if(cells[i][j].get_color() == cells[i+1][j+1].get_color() && cells[i][j].get_color() == cells[i+1][j-1].get_color()  ){
+           move_possible=true;
+         }
+        if(cells[i][j].get_color() == cells[i-1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
+           move_possible=true;
+          }
+         if(cells[i][j].get_color() == cells[i+1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()  ){
+           move_possible=true;
+          }
+    } 
+ } return move_possible;
+}
 
 
 
