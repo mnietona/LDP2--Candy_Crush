@@ -252,8 +252,11 @@ class Canvas {
   bool verifie_pas_0(); // verifie qu'il n'y a plus de case vide 
   void lire_fichier(const char* fichier_input); // prend un fichier pour construire plateau
   bool verif_mur(int x0,int y0,int x1,int y1); // vérifie si c'est un mur
-  bool verifie_mouvement_possible(); // vérifie si il y a des mouvements possible
+  bool verifie_mouvement_possible_diagonal(); // vérifie si il y a des mouvements possible
   void test();
+  bool verifie_mouvement_possible_vertical();
+  bool verifie_mouvement_possible_horizontal();
+  bool verifie_mouvement_possible();
   };
 
 
@@ -645,7 +648,7 @@ void Canvas::keyPressed(int keyCode) {
   }
 }
 
-bool Canvas::verifie_mouvement_possible(){
+bool Canvas::verifie_mouvement_possible_diagonal(){
   // vérifie si il y a un mouvement possible sur les diagonales.
   bool move_possible=false;
   for (int i = 1; i < 8; i++){
@@ -662,11 +665,73 @@ bool Canvas::verifie_mouvement_possible(){
         else  if(cells[i][j].get_color() == cells[i+1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()  ){
            move_possible=true;
           }
-        else  if(cells[i][j].get_color() == cells[i][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
-           move_possible=true;
-          }
     } 
  } return move_possible;
+}
+
+bool Canvas::verifie_mouvement_possible_vertical(){
+    bool move_possible=false;
+    for (int i = 0; i < 9; i++){
+      for (int j = 1; j< 8; j++){
+        if (i-1 < 0){
+            continue;
+        }
+        else if(cells[i][j].get_color() == cells[i][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i][j-1].get_color() && cells[i][j].get_color() == cells[i+1][j+1].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i][j-1].get_color() && cells[i][j].get_color() == cells[i][j+2].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i][j+1].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i][j+1].get_color() && cells[i][j].get_color() == cells[i+1][j-1].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i][j+1].get_color() && cells[i][j].get_color() == cells[i][j-2].get_color()  ){
+           move_possible=true;
+        }
+      }
+    } return move_possible;
+}  
+
+bool Canvas::verifie_mouvement_possible_horizontal(){
+    bool move_possible=false;
+    for (int i = 1; i < 7; i++){
+      for (int j = 0; j< 9; j++){
+        if(cells[i][j].get_color() == cells[i-1][j].get_color() && cells[i][j].get_color() == cells[i+1][j-1].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i-1][j].get_color() && cells[i][j].get_color() == cells[i+1][j+1].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i-1][j].get_color() && cells[i][j].get_color() == cells[i+2][j].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i+1][j].get_color() && cells[i][j].get_color() == cells[i-2][j].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i+1][j].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
+           move_possible=true;
+        }
+        else if(cells[i][j].get_color() == cells[i+1][j].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()  ){
+           move_possible=true;
+        }
+
+      }
+    }return move_possible;
+}
+
+bool Canvas::verifie_mouvement_possible(){
+    bool res = false;
+    
+    if (verifie_mouvement_possible_diagonal() || verifie_mouvement_possible_vertical() || verifie_mouvement_possible_horizontal() ){
+        res= true;
+    }
+    return res;
 }
 
 
