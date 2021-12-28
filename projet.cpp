@@ -24,7 +24,6 @@
 #include <string.h>
 #include <algorithm>
 #include <fstream>
-
 #include <stdio.h>								
 #include <stdlib.h>	
 
@@ -101,7 +100,6 @@ class Cell {
     int fruit;
     int w, h;
     bool selectionner = false;
-    vector<Cell *> neighbors;
     char *image;
     
     map<int,string> liste_bombon = {{0, "image/explosion.png",},{1, "image/bleu.png",},{2, "image/rouge.png",},
@@ -113,7 +111,8 @@ class Cell {
   // Constructor
   Cell(Point center, int w, int h, int fruit);
 
-  // Methodes 
+  // Methodes
+  void test();
   void cree_bombon();  // fonction repreise sur github
   void deplace(Point d); // redessine le bombom a x et y 
   void toucher(int fruit,bool s); // animation lors du survelement de la souris sur bombon
@@ -133,6 +132,10 @@ Cell::Cell(Point center, int w, int h, int fruit):
     {
       cree_bombon();
     }
+
+void Cell::test(){
+  plateau->redraw();
+}
 
 void Cell::cree_bombon(){
 
@@ -226,7 +229,7 @@ class Canvas {
  public:
   Canvas ()
   {
-    cree_plateau(2);
+    cree_plateau(3);
   }
 
 
@@ -247,16 +250,18 @@ class Canvas {
   void echange_bonbon(vector<Cell *> &liste); // change le deplacement du bombon sur l'interface 
   void tomber_fruits(); // fait tomber les fruit lor d'une surpression
   bool verifie_pas_0(); // verifie qu'il n'y a plus de case vide 
-  void lire_fichier(); // prend un fichier pour construire plateau
+  void lire_fichier(const char* fichier_input); // prend un fichier pour construire plateau
   bool verif_mur(int x0,int y0,int x1,int y1); // vérifie si c'est un mur
-  bool verifie_mouvement_possible(); // vérifie si il y a des mouvements possible 
+  bool verifie_mouvement_possible(); // vérifie si il y a des mouvements possible
+  void test();
   };
 
 
-void Canvas::lire_fichier(){
-    
-    ifstream fichier("test.txt");
+
+void Canvas::lire_fichier(const char* fichier_input){
+    ifstream fichier(fichier_input);
     vector<int> couleur_fichier;
+    couleur_fichier.clear();
     int fruit;
     int i = 0;
     while( fruit != 100) {
@@ -326,8 +331,25 @@ bool Canvas::debut_check_vertical(){
    return vertical;
 }
 
+void Canvas::test(){
+  for (int i= 0; i < 9; i++){
+       for (int j = 1; j < 9; j++){
+           if (cells[i][j].get_color() != 7){
+               int fruit = rand() %(6-1) + 1;
+               cells[i][j].set_color(fruit);
+           }
+           if (alligner(cells[i][j])){
+            efface();
+            }
+       }
+  }
+   while(!verifie_pas_0()){
+    tomber_fruits();
+    }
+}
 void Canvas::cree_plateau(int niveau){ 
-
+  couleur.clear();
+  cells.clear();
   switch(niveau){
     case 1:
       for (int i = 0; i < 9; i++){
@@ -339,8 +361,11 @@ void Canvas::cree_plateau(int niveau){
       }
       break;
     case 2:
-       lire_fichier();
+       lire_fichier("mur.txt");
        break;
+    case 3:
+    lire_fichier("test.txt");
+    break;
 }
     
   // boucle tant que 3 allignement
@@ -497,16 +522,17 @@ void Canvas::echange_bonbon(vector<Cell *> &liste){
 }
 
 void Canvas::deplacement(Cell *c){
+        if (!verifie_mouvement_possible()){
+          cout<<"plus de mouvement";
+          test();
+
+        }
 
     if (c->est_selectionner()){
        liste.push_back(c);
        c->deselectionner();
     }
-    if (!verifie_mouvement_possible()){
-      cout<< "plus de mouvement possible";
-      cree_plateau(1);
-    }
-
+   
     if (liste.size() == 2){
        
         int x0 = liste[0]->get_center().x/80;
@@ -537,7 +563,6 @@ void Canvas::deplacement(Cell *c){
                 echange_bonbon(liste);
             }
             liste.clear();
-            print();
 
         }else{
             liste.clear();
@@ -596,8 +621,9 @@ void Canvas::tomber_fruits(){
 
 void Canvas::mouseMove(Point mouseLoc) {
   for (auto &v: cells)
-    for (auto &c: v)
+    for (auto &c: v){
       c.mouseMove(mouseLoc);
+    }
 }
 
 void Canvas::mouseClick(Point mouseLoc) {
@@ -627,21 +653,21 @@ bool Canvas::verifie_mouvement_possible(){
         if(cells[i][j].get_color() == cells[i+1][j+1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
           move_possible=true;
        }
-        if(cells[i][j].get_color() == cells[i+1][j+1].get_color() && cells[i][j].get_color() == cells[i+1][j-1].get_color()  ){
+        else if(cells[i][j].get_color() == cells[i+1][j+1].get_color() && cells[i][j].get_color() == cells[i+1][j-1].get_color()  ){
            move_possible=true;
          }
-        if(cells[i][j].get_color() == cells[i-1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
+        else if(cells[i][j].get_color() == cells[i-1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
            move_possible=true;
           }
-         if(cells[i][j].get_color() == cells[i+1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()  ){
+        else  if(cells[i][j].get_color() == cells[i+1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()  ){
+           move_possible=true;
+          }
+        else  if(cells[i][j].get_color() == cells[i][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
            move_possible=true;
           }
     } 
  } return move_possible;
 }
-
-
-
 
 
 
