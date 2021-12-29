@@ -237,7 +237,7 @@ class Canvas {
  public:
   Canvas ()
   {
-    cree_plateau(1);
+    cree_plateau(3);
   }
 
 
@@ -265,6 +265,7 @@ class Canvas {
   bool verifie_mouvement_possible_horizontal();
   bool verifie_mouvement_possible();
   void test();
+  void super_bonbon(int x1, int y1, int x0, int y0);
 
   };
 
@@ -427,6 +428,7 @@ void Canvas::efface(){
   else if (vertical.size() == 5){
      couleur_new_bonbon = 20;
   }
+  
     // VIOR SI ON PEUX CHANGER 
     if (vertical.size() >= 3){
        if (couleur_new_bonbon == 7){
@@ -438,8 +440,8 @@ void Canvas::efface(){
             cells[x][y].set_color(couleur_new_bonbon);
             cells[x][y].deplace({x * 80,y*80});
             couleur_new_bonbon = 0;
+            }
         }
-    }
 
   if (horizontal.size() == 4){
     couleur_ancien = horizontal[0].get_color();
@@ -475,12 +477,20 @@ bool Canvas::alligner_horizontal(Cell c){
 
     int x = c.get_center().x/80;
     int y = c.get_center().y/80;
+    int jsp = c.get_color();
+    if (jsp > 7){
+      if (jsp > 13){
+        jsp = jsp-13;
+      }else{
+        jsp = jsp-7;
+      }
+    }
 
     // #### HORIZONTAL 
     horizontal.push_back(c);
     // horizontal droite
     x++;
-    while (x < 9 && cells[x][y].get_color() == c.get_color()){
+    while (x < 9 && (cells[x][y].get_color() == jsp || jsp == cells[x][y].get_color()-7 || jsp == cells[x][y].get_color()-13 )){
         if (c.get_color() == 7){
             break;
         }else{
@@ -492,7 +502,7 @@ bool Canvas::alligner_horizontal(Cell c){
     // horizontal gauche
     x = c.get_center().x/80;
     x--;
-    while (x >= 0 && cells[x][y].get_color() == c.get_color()){
+    while (x >= 0 && (cells[x][y].get_color() == jsp || jsp == cells[x][y].get_color()-7 || jsp == cells[x][y].get_color()-13 )){
         if (c.get_color() == 7){
             break;
         }else{
@@ -508,12 +518,20 @@ bool Canvas::alligner_vertical(Cell c){
 
     int x = c.get_center().x/80;
     int y = c.get_center().y/80;
+    int jsp = c.get_color();
+    if (jsp > 7){
+      if (jsp > 13){
+        jsp = jsp-13;
+      }else{
+        jsp = jsp-7;
+      }
+    }
 
     // #### VERTICAL 
     vertical.push_back(c);
     // vertical bas
     y++;
-    while (y < 9 && cells[x][y].get_color() == c.get_color()){
+    while (y < 9 && (cells[x][y].get_color() == jsp || jsp == cells[x][y].get_color()-7 || jsp == cells[x][y].get_color()-13 )){
         if (c.get_color() == 7){
             break;
         }else{
@@ -525,7 +543,7 @@ bool Canvas::alligner_vertical(Cell c){
     // vertical haut
     y = c.get_center().y/80;
     y--;
-    while (y >= 0 && cells[x][y].get_color() == c.get_color()){
+    while (y >= 0 && (cells[x][y].get_color() == jsp || jsp == cells[x][y].get_color()-7 || jsp == cells[x][y].get_color()-13) ){
         if (c.get_color() == 7){
             break;
         }else{
@@ -595,10 +613,22 @@ void Canvas::deplacement(Cell *c){
             
             echange_bonbon(liste); // change bombon FLTK
             
-            bool res = alligner(cells[x0][y0]);
+            bool res = false;
+            bool res_1 = false;
+            
+            if (cells[x0][y0].get_color() == 20 || cells[x1][y1].get_color() == 20 ){
+              super_bonbon(x1,y1,x0,y0);
+              res = true;
+              res_1 = true;
+            }
+           
+           else{
+            res = alligner(cells[x0][y0]);
             efface();
-            bool res_1 = alligner(cells[x1][y1]);
+            res_1 = alligner(cells[x1][y1]);
             efface();
+           }
+            
 
            
            while(!verifie_pas_0()){
@@ -612,6 +642,7 @@ void Canvas::deplacement(Cell *c){
             }
 
             if (!res && !res_1){
+                cout << "ICIIII FD" << endl;
                 change_2_bombon(x1, y1, x0, y0);
                 echange_bonbon(liste);
             }
@@ -678,7 +709,28 @@ void Canvas::tomber_fruits(){
    
 }
 
-
+void Canvas::super_bonbon(int x1, int y1, int x0, int y0){
+  for (int i = 0; i< 9; i++){
+    for (int j = 0; j < 9; j++){
+      if (cells[i][j].get_color() ==  cells[x1][y1].get_color() && cells[x1][y1].get_color() != 20){
+        if (i == x1 && j == y1){
+          continue;
+        }else{
+          cells[i][j].set_color(0);
+        }
+      }
+      else if (cells[i][j].get_color() ==  cells[x0][y0].get_color() && cells[x0][y0].get_color() != 20){
+        if (i == x0 && j == y0){
+          continue;
+        }else{
+          cells[i][j].set_color(0);
+        }
+      }
+    }
+  }
+  cells[x0][y0].set_color(0);
+  cells[x1][y1].set_color(0);
+}
 
 
 void Canvas::mouseMove(Point mouseLoc) {
