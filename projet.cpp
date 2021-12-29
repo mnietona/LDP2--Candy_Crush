@@ -600,7 +600,7 @@ void Canvas::tomber_fruits(){
     } 
    for (int i = 0; i < 9 ; i++){
       for (int j = 0; j< 9; j++){
-        // sert a rien bool res = alligner(cells[i][j]);
+        alligner(cells[i][j]);
         efface();
       } 
     }
