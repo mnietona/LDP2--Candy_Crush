@@ -10,7 +10,7 @@ const double refreshPerSecond = 60;
  *
  * Pas toucher 
  */
-
+// class Windows prit du TP5
 class MainWindow : public Fl_Window {
   Canvas canvas;
  public:
