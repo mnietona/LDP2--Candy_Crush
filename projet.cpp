@@ -267,7 +267,7 @@ void Canvas::lire_fichier(const char* fichier_input){
     vector<int> couleur_fichier;
     couleur_fichier.clear();
     int fruit;
-    int i = 0;
+    // int 100 permet de s'arrêter dans le fichier
     while( fruit != 100) {
         fichier >> fruit;
         couleur_fichier.push_back(fruit);
@@ -403,7 +403,7 @@ bool Canvas:: a_coter(int x0, int y0, int x1, int y1){
 void Canvas::efface(){
     // VIOR SI ON PEUX CHANGER 
     if (vertical.size() >= 3){
-        for (int i = 0; i < vertical.size(); i++){
+        for (long unsigned int i = 0; i < vertical.size(); i++){
             int x = vertical[i].get_center().x/80;
             int y = vertical[i].get_center().y/80;
             cells[x][y].set_color(0);
@@ -412,7 +412,7 @@ void Canvas::efface(){
     }
 
     if (horizontal.size() >= 3){
-        for (int i = 0; i < horizontal.size(); i++){
+        for (long unsigned int i = 0; i < horizontal.size(); i++){
             int x = horizontal[i].get_center().x/80;
             int y = horizontal[i].get_center().y/80;
             cells[x][y].set_color(0);
