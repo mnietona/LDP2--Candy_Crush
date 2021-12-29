@@ -266,12 +266,10 @@ void Canvas::lire_fichier(const char* fichier_input){
     ifstream fichier(fichier_input);
     vector<int> couleur_fichier;
     couleur_fichier.clear();
-    int fruit;
-    int i = 0;
+    int fruit = 0;
     while( fruit != 100) {
         fichier >> fruit;
         couleur_fichier.push_back(fruit);
-    
     }
 
     int x = 0;
@@ -358,8 +356,8 @@ void Canvas::cree_plateau(int niveau){
        lire_fichier("mur.txt");
        break;
     case 3:
-    lire_fichier("test.txt");
-    break;
+       lire_fichier("test.txt");
+       break;
 }
     
   // boucle tant que 3 allignement
@@ -409,7 +407,7 @@ bool Canvas:: a_coter(int x0, int y0, int x1, int y1){
 void Canvas::efface(){
     // VIOR SI ON PEUX CHANGER 
     if (vertical.size() >= 3){
-        for (int i = 0; i < vertical.size(); i++){
+        for (unsigned long int i = 0; i < vertical.size(); i++){
             int x = vertical[i].get_center().x/80;
             int y = vertical[i].get_center().y/80;
             cells[x][y].set_color(0);
@@ -418,7 +416,7 @@ void Canvas::efface(){
     }
 
     if (horizontal.size() >= 3){
-        for (int i = 0; i < horizontal.size(); i++){
+        for (unsigned long int i = 0; i < horizontal.size(); i++){
             int x = horizontal[i].get_center().x/80;
             int y = horizontal[i].get_center().y/80;
             cells[x][y].set_color(0);
@@ -441,16 +439,24 @@ bool Canvas::alligner_horizontal(Cell c){
     // horizontal droite
     x++;
     while (x < 9 && cells[x][y].get_color() == c.get_color()){
-        horizontal.push_back(cells[x][y]);
-        x++;
+        if (c.get_color() == 7){
+            break;
+        }else{
+            horizontal.push_back(cells[x][y]);
+            x++;
+        }
     }
 
     // horizontal gauche
     x = c.get_center().x/80;
     x--;
     while (x >= 0 && cells[x][y].get_color() == c.get_color()){
-        horizontal.push_back(cells[x][y]);
-        x--;
+        if (c.get_color() == 7){
+            break;
+        }else{
+            horizontal.push_back(cells[x][y]);
+            x--;
+        }
     }
 
     return horizontal.size() >= 3;
@@ -466,16 +472,24 @@ bool Canvas::alligner_vertical(Cell c){
     // vertical bas
     y++;
     while (y < 9 && cells[x][y].get_color() == c.get_color()){
-        vertical.push_back(cells[x][y]);
-        y++;
+        if (c.get_color() == 7){
+            break;
+        }else{
+            vertical.push_back(cells[x][y]);
+            y++;
+        }
     }
 
     // vertical haut
     y = c.get_center().y/80;
     y--;
     while (y >= 0 && cells[x][y].get_color() == c.get_color()){
-        vertical.push_back(cells[x][y]);
-        y--;
+        if (c.get_color() == 7){
+            break;
+        }else{
+            vertical.push_back(cells[x][y]);
+            y--;
+        }
     }
 
     return vertical.size() >= 3;   
@@ -544,6 +558,12 @@ void Canvas::deplacement(Cell *c){
            
            while(!verifie_pas_0()){
                 tomber_fruits();
+                for (int i = 0; i < 9 ; i++){
+                  for (int j = 0; j< 9; j++){
+                    alligner(cells[i][j]);
+                    efface();
+                  } 
+                }
             }
 
             if (!res && !res_1){
@@ -555,10 +575,18 @@ void Canvas::deplacement(Cell *c){
         }else{
             liste.clear();
             liste.push_back(c);
-        }
+        } 
+        
     }
 
+    /*if (!verifie_mouvement_possible()){
+        cout << "jsuis la" << endl;
+        fl_message(" Il n'y a plus de mouvement, les bonbons vont être remplacé aléatoirement.");
+        test();
+    } 
+    */
     
+
     
 }
 
@@ -600,12 +628,7 @@ void Canvas::tomber_fruits(){
         }
       }
     } 
-   for (int i = 0; i < 9 ; i++){
-      for (int j = 0; j< 9; j++){
-        alligner(cells[i][j]);
-        efface();
-      } 
-    }
+   
 }
 
 void Canvas::mouseMove(Point mouseLoc) {
@@ -613,6 +636,7 @@ void Canvas::mouseMove(Point mouseLoc) {
     for (auto &c: v){
       c.mouseMove(mouseLoc);
     }
+
 }
 
 void Canvas::mouseClick(Point mouseLoc) {
@@ -634,6 +658,9 @@ void Canvas::keyPressed(int keyCode) {
   }
 }
 
+
+
+
 bool Canvas::verifie_mouvement_possible_diagonal(){
   // vérifie si il y a un mouvement possible sur les diagonales.
   bool move_possible=false;
@@ -650,7 +677,7 @@ bool Canvas::verifie_mouvement_possible_diagonal(){
           }
         else  if(cells[i][j].get_color() == cells[i+1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()  ){
            move_possible=true;
-          }
+        }
     } 
  } return move_possible;
 }
