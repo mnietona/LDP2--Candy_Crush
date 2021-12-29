@@ -229,7 +229,7 @@ class Canvas {
  public:
   Canvas ()
   {
-    cree_plateau(1);
+    cree_plateau(3);
   }
 
 
@@ -556,14 +556,9 @@ void Canvas::deplacement(Cell *c){
             liste.clear();
             liste.push_back(c);
         }
-
     }
 
-    if (!verifie_mouvement_possible()){
-        cout << "jsuis la" << endl;
-        fl_message(" Il n'y a plus de mouvement, les bonbons vont être remplacé aléatoirement.");
-        test();
-    }
+    
     
 }
 
