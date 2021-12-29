@@ -229,7 +229,7 @@ class Canvas {
  public:
   Canvas ()
   {
-    cree_plateau(3);
+    cree_plateau(1);
   }
 
 
@@ -535,8 +535,7 @@ void Canvas::deplacement(Cell *c){
             bool res_1 = alligner(cells[x1][y1]);
             efface();
 
-
-            
+           
            while(!verifie_pas_0()){
                 tomber_fruits();
             }
@@ -598,8 +597,7 @@ void Canvas::tomber_fruits(){
           }
         }
       }
-    }  
-
+    } 
    for (int i = 0; i < 9 ; i++){
       for (int j = 0; j< 9; j++){
         bool res = alligner(cells[i][j]);
@@ -789,6 +787,16 @@ class MainWindow : public Fl_Window {
       case FL_KEYDOWN:
         canvas.keyPressed(Fl::event_key());
         return 1;
+      case FL_DRAG:
+		if (Fl::event_button1()) {
+			canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+			return 1;
+		}
+		else if (Fl::event_button3()) {
+			canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+			return 1;
+		}
+        return 0;
     }
     return 0;
   }
