@@ -781,22 +781,16 @@ class MainWindow : public Fl_Window {
       case FL_MOVE:
         canvas.mouseMove(Point{Fl::event_x(), Fl::event_y()});
         return 1;
-      case FL_PUSH:
-        canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-        return 1;
+      //case FL_PUSH:
+        //canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+        //return 1;
       case FL_KEYDOWN:
         canvas.keyPressed(Fl::event_key());
         return 1;
       case FL_DRAG:
-		if (Fl::event_button1()) {
-			canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-			return 1;
-		}
-		else if (Fl::event_button3()) {
-			canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-			return 1;
-		}
-        return 0;
+		canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+		return 1;
+
     }
     return 0;
   }
