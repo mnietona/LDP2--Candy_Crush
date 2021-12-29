@@ -104,7 +104,11 @@ class Cell {
     
     map<int,string> liste_bombon = {{0, "image/explosion.png",},{1, "image/bleu.png",},{2, "image/rouge.png",},
                                {3, "image/vert.png",},{4, "image/jaune.png",},{5, "image/orange.png",},
-                               {6, "image/mauve.png",},{7,"image/mur.png",}};
+                               {6, "image/mauve.png",},{7,"image/mur.png",},{8,"image/r_bleu.png",},{9,"image/r_rouge.png",},
+                               {10,"image/r_vert.png",},{11,"image/r_jaune.png",},{12,"image/r_orange.png",},
+                               {13,"image/r_mauve.png"},{14,"image/e_bleu.png",},{15,"image/e_rouge.png",},
+                               {16,"image/e_vert.png",},{17,"image/e_jaune.png",},{18,"image/e_orange.png",},
+                               {19,"image/e_mauve.png"},{20,"image/couleur.png",}};
 
 
  public:
@@ -151,8 +155,12 @@ void Cell::toucher(int fruit,bool s) {
   
   if (s){
       map<int ,string> liste_t_bombon = {{0, "image/explosion.png",},{1, "image/bleu_s.png",},{2, "image/rouge_s.png",},
-                                        {3, "image/vert_s.png",},{4, "image/jaune_s.png",},
-                                        {5, "image/orange_s.png",},{6, "image/mauve_s.png",},{7,"image/mur.png",}};
+                                        {3, "image/vert_s.png",},{4, "image/jaune_s.png",},{5, "image/orange_s.png",},
+                                        {6, "image/mauve_s.png",},{7,"image/mur.png",},{8,"image/r_bleu.png",},{9,"image/r_rouge.png",},
+                               {10,"image/r_vert.png",},{11,"image/r_jaune.png",},{12,"image/r_orange.png",},
+                               {13,"image/r_mauve.png"},{14,"image/e_bleu.png",},{15,"image/e_rouge.png",},
+                               {16,"image/e_vert.png",},{17,"image/e_jaune.png",},{18,"image/e_orange.png",},
+                               {19,"image/e_mauve.png"},{20,"image/couleur.png",}};
       image = &liste_t_bombon.find (fruit)->second[0];
       candy = new Candy(image);
       plateau->image(candy);
@@ -229,7 +237,7 @@ class Canvas {
  public:
   Canvas ()
   {
-    cree_plateau(3);
+    cree_plateau(1);
   }
 
 
@@ -371,14 +379,13 @@ void Canvas::cree_plateau(int niveau){
   // cree le plateau de cells
   for (int x = 0; x < 9; x++)
   {
-    cells.emplace_back ();
+    cells.emplace_back();
     for (int y = 0; y < 9; y++){
         int fruit = couleur[x][y];
         cells[x].push_back ({{x * 80 , y * 80}, 80, 80, fruit});
       }
   }
 
-  //cree_voisin(); // initialise le voisin de chaque cells 
 
   print();
     
@@ -405,22 +412,57 @@ bool Canvas:: a_coter(int x0, int y0, int x1, int y1){
 }
 
 void Canvas::efface(){
+  int couleur_new_bonbon = 0;
+  int couleur_ancien = 0;
+
+  if (vertical.size() == 4){
+    couleur_ancien = vertical[0].get_color();
+    couleur_new_bonbon =  couleur_ancien+7;
+  }
+  else if (vertical.size() == 3 && horizontal.size() == 3 && vertical[0].get_color() == horizontal[0].get_color()){
+   couleur_ancien = vertical[0].get_color();
+   couleur_new_bonbon =  couleur_ancien+13;
+
+  }
+  else if (vertical.size() == 5){
+     couleur_new_bonbon = 20;
+  }
     // VIOR SI ON PEUX CHANGER 
     if (vertical.size() >= 3){
+       if (couleur_new_bonbon == 7){
+         couleur_new_bonbon = 0;
+       }
         for (unsigned long int i = 0; i < vertical.size(); i++){
             int x = vertical[i].get_center().x/80;
             int y = vertical[i].get_center().y/80;
-            cells[x][y].set_color(0);
+            cells[x][y].set_color(couleur_new_bonbon);
             cells[x][y].deplace({x * 80,y*80});
+            couleur_new_bonbon = 0;
         }
     }
 
+  if (horizontal.size() == 4){
+    couleur_ancien = horizontal[0].get_color();
+    couleur_new_bonbon = couleur_ancien+7;
+  }
+  else if (vertical.size() == 3 && horizontal.size() == 3 && vertical[0].get_color() == horizontal[0].get_color()){
+   couleur_ancien = vertical[0].get_color();
+   couleur_new_bonbon =  couleur_ancien+13;
+  }
+  else if (horizontal.size() == 5){
+     couleur_new_bonbon = 20;
+  }
+
     if (horizontal.size() >= 3){
+      if (couleur_new_bonbon == 7){
+         couleur_new_bonbon = 0;
+       }
         for (unsigned long int i = 0; i < horizontal.size(); i++){
             int x = horizontal[i].get_center().x/80;
             int y = horizontal[i].get_center().y/80;
-            cells[x][y].set_color(0);
+            cells[x][y].set_color(couleur_new_bonbon);
             cells[x][y].deplace({x*80,y*80});
+            couleur_new_bonbon = 0;
         }
     }
 
@@ -546,6 +588,9 @@ void Canvas::deplacement(Cell *c){
         
         if (a_coter(x0, y0, x1, y1) && !verif_mur(x0, y0, x1, y1)){
 
+          cout << "couleur " << liste[0]->get_color();
+          cout << "couleur " << liste[1]->get_color() << endl;
+
             change_2_bombon(x0, y0, x1, y1); // change bombom sur le terminal 
             
             echange_bonbon(liste); // change bombon FLTK
@@ -570,6 +615,7 @@ void Canvas::deplacement(Cell *c){
                 change_2_bombon(x1, y1, x0, y0);
                 echange_bonbon(liste);
             }
+            print();
             liste.clear();
 
         }else{
@@ -578,11 +624,12 @@ void Canvas::deplacement(Cell *c){
         } 
         
     }
-
-    /*if (!verifie_mouvement_possible()){
+    /* fait beug par rapport a tache 5
+    if (!verifie_mouvement_possible()){
         cout << "jsuis la" << endl;
         fl_message(" Il n'y a plus de mouvement, les bonbons vont être remplacé aléatoirement.");
         test();
+        
     } 
     */
     
@@ -631,6 +678,9 @@ void Canvas::tomber_fruits(){
    
 }
 
+
+
+
 void Canvas::mouseMove(Point mouseLoc) {
   for (auto &v: cells)
     for (auto &c: v){
@@ -661,6 +711,8 @@ void Canvas::keyPressed(int keyCode) {
 
 
 
+
+/* Pour tache 5 voir pq beug ?
 bool Canvas::verifie_mouvement_possible_diagonal(){
   // vérifie si il y a un mouvement possible sur les diagonales.
   bool move_possible=false;
@@ -703,7 +755,7 @@ bool Canvas::verifie_mouvement_possible_vertical(){
         else if(i+1 <= 9 && j+1 <= 9 && j-1 >=0 && cells[i][j].get_color() == cells[i][j+1].get_color() && cells[i][j].get_color() == cells[i+1][j-1].get_color()){
            move_possible=true;
         }
-        else if(j+2 <= 9 && j-2 >=0 && cells[i][j].get_color() == cells[i][j+1].get_color() && cells[i][j].get_color() == cells[i][j-2].get_color()){
+        else if(j+1 <= 9 && j-2 >=0 && cells[i][j].get_color() == cells[i][j+1].get_color() && cells[i][j].get_color() == cells[i][j-2].get_color()){
            move_possible=true;
         }
       }
@@ -740,8 +792,8 @@ bool Canvas::verifie_mouvement_possible_horizontal(){
 
 bool Canvas::verifie_mouvement_possible(){
     bool res = false;
-    
-    if (verifie_mouvement_possible_diagonal() || verifie_mouvement_possible_vertical() || verifie_mouvement_possible_horizontal() ){
+    cout << "ici";
+    if ( verifie_mouvement_possible_diagonal() || verifie_mouvement_possible_vertical() || verifie_mouvement_possible_horizontal() ){
         res= true;
     }
     return res;
@@ -761,8 +813,15 @@ void Canvas::test(){
   }
    while(!verifie_pas_0()){
     tomber_fruits();
+    for (int i = 0; i < 9 ; i++){
+      for (int j = 0; j< 9; j++){
+        alligner(cells[i][j]);
+        efface();
+      } 
     }
+  }
 }
+*/
 
 
 
@@ -806,8 +865,8 @@ class MainWindow : public Fl_Window {
         canvas.keyPressed(Fl::event_key());
         return 1;
       case FL_DRAG:
-		canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-		return 1;
+        canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+		    return 1;
 
     }
     return 0;
