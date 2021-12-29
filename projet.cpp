@@ -8,7 +8,7 @@
  * 6 = mauve  
  * 
  */
-
+#include <FL/fl_ask.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Shared_Image.H>
@@ -253,10 +253,11 @@ class Canvas {
   void lire_fichier(const char* fichier_input); // prend un fichier pour construire plateau
   bool verif_mur(int x0,int y0,int x1,int y1); // vérifie si c'est un mur
   bool verifie_mouvement_possible_diagonal(); // vérifie si il y a des mouvements possible
-  void test();
   bool verifie_mouvement_possible_vertical();
   bool verifie_mouvement_possible_horizontal();
   bool verifie_mouvement_possible();
+
+  void test();
   };
 
 
@@ -334,22 +335,6 @@ bool Canvas::debut_check_vertical(){
    return vertical;
 }
 
-void Canvas::test(){
-  for (int i= 0; i < 9; i++){
-       for (int j = 1; j < 9; j++){
-           if (cells[i][j].get_color() != 7){
-               int fruit = rand() %(6-1) + 1;
-               cells[i][j].set_color(fruit);
-           }
-           if (alligner(cells[i][j])){
-            efface();
-            }
-       }
-  }
-   while(!verifie_pas_0()){
-    tomber_fruits();
-    }
-}
 void Canvas::cree_plateau(int niveau){ 
   couleur.clear();
   cells.clear();
@@ -525,11 +510,6 @@ void Canvas::echange_bonbon(vector<Cell *> &liste){
 }
 
 void Canvas::deplacement(Cell *c){
-        if (!verifie_mouvement_possible()){
-          cout<<"plus de mouvement";
-          test();
-
-        }
 
     if (c->est_selectionner()){
        liste.push_back(c);
@@ -571,6 +551,12 @@ void Canvas::deplacement(Cell *c){
             liste.clear();
             liste.push_back(c);
         }
+
+    }
+
+    if (!verifie_mouvement_possible()){
+        fl_message(" Il n'y a plus de mouvement, les bobmbon vont etre remplacer aleatoirement.");
+        test();
     }
     
 }
@@ -647,6 +633,7 @@ void Canvas::keyPressed(int keyCode) {
         exit(0);
   }
 }
+
 
 bool Canvas::verifie_mouvement_possible_diagonal(){
   // vérifie si il y a un mouvement possible sur les diagonales.
@@ -733,6 +720,45 @@ bool Canvas::verifie_mouvement_possible(){
     }
     return res;
 }
+
+void Canvas::test(){
+  for (int i= 0; i < 9; i++){
+       for (int j = 1; j < 9; j++){
+           if (cells[i][j].get_color() != 7){
+               int fruit = rand() %(6-1) + 1;
+               cells[i][j].set_color(fruit);
+           }
+           if (alligner(cells[i][j])){
+            efface();
+            }
+       }
+  }
+   while(!verifie_pas_0()){
+    tomber_fruits();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
