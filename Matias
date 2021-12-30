@@ -116,7 +116,6 @@ class Cell {
   Cell(Point center, int w, int h, int fruit);
 
   // Methodes
-  void test();
   void cree_bombon();  // fonction repreise sur github
   void deplace(Point d); // redessine le bombom a x et y 
   void toucher(int fruit,bool s); // animation lors du survelement de la souris sur bombon
@@ -136,10 +135,6 @@ Cell::Cell(Point center, int w, int h, int fruit):
     {
       cree_bombon();
     }
-
-void Cell::test(){
-  plateau->redraw();
-}
 
 void Cell::cree_bombon(){
 
@@ -229,15 +224,17 @@ Point Cell::get_center() const{
  */
 class Canvas {
   vector< vector<Cell> > cells;
+  vector< Cell *> cases;
   vector<vector<int> > couleur;
   vector<Cell *> liste;
   vector<Cell > horizontal;
   vector<Cell > vertical;
+
   
  public:
   Canvas ()
   {
-    cree_plateau(2);
+    cree_plateau(3);
   }
 
 
@@ -264,11 +261,10 @@ class Canvas {
   bool verifie_mouvement_possible_vertical();
   bool verifie_mouvement_possible_horizontal();
   bool verifie_mouvement_possible();
-  void test();
   void super_bonbon(int x1, int y1, int x0, int y0);
+  bool a_coter_diagonal(int x0, int y0, int x1, int y1);
 
   };
-
 
 
 void Canvas::lire_fichier(const char* fichier_input){
@@ -316,10 +312,9 @@ bool Canvas::debut_check_horizontal(){
            else if( couleur[i][j] == couleur[i-1][j] && couleur[i][j] == couleur[i+1][j]){
                horizontal = true;
                while(couleur[i][j] == couleur[i-1][j]){
-                   int fruit = rand() %(6-1) + 1;
+                   int fruit = rand() %(7-1) + 1;
                    couleur[i][j] = fruit;
                 }
-                cout << " horizontal" << endl;
            }
         }
    }
@@ -337,7 +332,7 @@ bool Canvas::debut_check_vertical(){
            else if( couleur[i][j] == couleur[i][j-1] && couleur[i][j] == couleur[i][j+1]){
                vertical = true;
                while(couleur[i][j] == couleur[i][j-1]){
-                   int fruit = rand() %(6-1) + 1;
+                   int fruit = rand() %(7-1) + 1;
                    couleur[i][j] = fruit;
                 }
                 cout << " vertical" << endl;
@@ -356,7 +351,7 @@ void Canvas::cree_plateau(int niveau){
       for (int i = 0; i < 9; i++){
         couleur.emplace_back ();
         for (int j = 0; j < 9; j++){
-            int fruit = rand() %(6-1) + 1;
+            int fruit = rand() %(7-1) +1;
             couleur[i].push_back(fruit);
         }
       }
@@ -412,6 +407,26 @@ bool Canvas:: a_coter(int x0, int y0, int x1, int y1){
     return coter;
 }
 
+bool Canvas:: a_coter_diagonal(int x0, int y0, int x1, int y1){
+
+    bool coter = false;
+
+    if (x0 - 1 >= 0 && y0 - 1 >= 0 && x0 - 1 ==  x1 && y0 - 1 == y1 ){
+        coter = true;
+    }
+    else if (x0 + 1 < 9 && y0 + 1 < 9 && x0 + 1 == x1 && y0 + 1 == y1 ){
+        coter = true;
+    }
+    else if (x0 + 1 < 9 && y0 - 1 >=0 && x0 + 1 == x1 && y0 - 1 == y1 ){
+        coter = true;
+    }
+    else if (x0 - 1 >= 0 && y0 + 1 < 9 && x0 - 1 == x1 && y0 + 1 == y1 ){
+        coter = true;
+    }
+
+    return coter;
+}
+
 void Canvas::efface(){
   int couleur_new_bonbon = 0;
   int couleur_ancien = 0;
@@ -453,11 +468,38 @@ void Canvas::efface(){
                 couleur_new_bonbon = 0;
               }
             }
-            else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){
-              continue;
-            }else if (!stop){
+            
+            else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
+              cells[x][y].set_color(0);
+              if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
+                cells[x+1][y].set_color(0);
+              }
+              if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
+                cells[x][y+1].set_color(0);
+              }
+              if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
+                cells[x-1][y].set_color(0);
+              }
+              if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
+                cells[x][y-1].set_color(0);
+              }
+              if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
+                cells[x+1][y+1].set_color(0);
+              }
+              if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
+                cells[x-1][y-1].set_color(0);
+              }
+              if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
+                 cells[x+1][y-1].set_color(0);
+              }
+              if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
+                 cells[x-1][y+1].set_color(0);
+              }
+            }
+            
+            else if (!stop){
             cells[x][y].set_color(couleur_new_bonbon);
-            //cells[x][y].deplace({x * 80,y*80});
+            cells[x][y].deplace({x * 80,y*80});
             couleur_new_bonbon = 0;
             }
          }
@@ -481,6 +523,7 @@ void Canvas::efface(){
   }
   stop = false;
     if (horizontal.size() >= 3 && horizontal[0].get_color() != 0){
+        
         for (unsigned long int i = 0; i < horizontal.size(); i++){
             int x = horizontal[i].get_center().x/80;
             int y = horizontal[i].get_center().y/80;
@@ -495,14 +538,47 @@ void Canvas::efface(){
                 stop = true;
                 couleur_new_bonbon = 0;
               }
-            }else if (!stop){
+            
+            
+            
+            }
+            
+            else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
+              cells[x][y].set_color(0);
+              if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
+                cells[x+1][y].set_color(0);
+              }
+              if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
+                cells[x][y+1].set_color(0);
+              }
+              if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
+                cells[x-1][y].set_color(0);
+              }
+              if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
+                cells[x][y-1].set_color(0);
+              }
+              if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
+                cells[x+1][y+1].set_color(0);
+              }
+              if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
+                cells[x-1][y-1].set_color(0);
+              }
+              if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
+                 cells[x+1][y-1].set_color(0);
+              }
+              if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
+                 cells[x-1][y+1].set_color(0);
+              }
+            }
+            
+            else if (!stop){
             cells[x][y].set_color(couleur_new_bonbon);
             cells[x][y].deplace({x * 80,y*80});
             couleur_new_bonbon = 0;
             }
         }
     }
-
+    
     horizontal.clear();
     vertical.clear();
 
@@ -656,19 +732,29 @@ void Canvas::deplacement(Cell *c){
               res = true;
               res_1 = true;
             }
+
            
            else{
             res = alligner(cells[x0][y0]);
             efface();
             res_1 = alligner(cells[x1][y1]);
             efface();
+            Fl::wait();
            }
+           
+           print();
+
+           for (int i =0; i < 9; i++){
+             for (int j=0; j < 9; j++){
+               cases.push_back(&cells[i][j]);
+              }
+            }
             
 
            
            while(!verifie_pas_0()){
-              tomber_fruits();
-              for (int i = 0; i < 9 ; i++){
+             tomber_fruits();
+             for (int i = 0; i < 9 ; i++){
                 for (int j = 0; j< 9; j++){
                   alligner(cells[i][j]);
                   efface();
@@ -689,6 +775,7 @@ void Canvas::deplacement(Cell *c){
         } 
         
     }
+
     /* fait beug par rapport a tache 5
     if (!verifie_mouvement_possible()){
         cout << "jsuis la" << endl;
@@ -716,13 +803,13 @@ bool Canvas::verifie_pas_0(){
 }
 
 void Canvas::tomber_fruits(){
-
+    
     for (int i = 0; i < 9 ; i++){
       for (int j = 0; j< 9; j++){
           
         if (cells[i][j].get_color() == 0){
           if (j==0){
-              int fruit = rand() %(6-1) + 1;
+              int fruit = rand() %(7-1) +1;
               cells[i][j].set_color(fruit);
           }else{
             // vérifie si c'est un mur 
@@ -767,6 +854,10 @@ void Canvas::super_bonbon(int x1, int y1, int x0, int y0){
   cells[x0][y0].set_color(0);
   cells[x1][y1].set_color(0);
 }
+
+
+
+
 
 
 void Canvas::mouseMove(Point mouseLoc) {
