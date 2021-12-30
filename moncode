@@ -415,7 +415,9 @@ bool Canvas:: a_coter(int x0, int y0, int x1, int y1){
 void Canvas::efface(){
   int couleur_new_bonbon = 0;
   int couleur_ancien = 0;
+  bool stop = false;
 
+// cree bonbon special si possible
   if (vertical.size() == 4){
     couleur_ancien = vertical[0].get_color();
     couleur_new_bonbon =  couleur_ancien+7;
@@ -429,20 +431,32 @@ void Canvas::efface(){
      couleur_new_bonbon = 20;
   }
   
-    // VIOR SI ON PEUX CHANGER 
-    if (vertical.size() >= 3){
-       if (couleur_new_bonbon == 7){
+  if (couleur_new_bonbon == 7){
          couleur_new_bonbon = 0;
        }
+    
+    // VIOR SI ON PEUX CHANGER 
+    if (vertical.size() >= 3){
+       
         for (unsigned long int i = 0; i < vertical.size(); i++){
             int x = vertical[i].get_center().x/80;
             int y = vertical[i].get_center().y/80;
+            if(cells[x][y].get_color() > 7 && cells[x][y].get_color() < 14){ // bonbon rayer 
+              for (int j = 0; j < 9; j++){
+                cells[x][j].set_color(couleur_new_bonbon);
+                //cells[x][j].deplace({x * 80,y*80});
+                stop = true;
+                couleur_new_bonbon = 0;
+              }
+            }else if (!stop){
             cells[x][y].set_color(couleur_new_bonbon);
-            cells[x][y].deplace({x * 80,y*80});
+            //cells[x][y].deplace({x * 80,y*80});
             couleur_new_bonbon = 0;
             }
-        }
+         }
+      }
 
+//cree bobnon specila si possible
   if (horizontal.size() == 4){
     couleur_ancien = horizontal[0].get_color();
     couleur_new_bonbon = couleur_ancien+7;
@@ -454,17 +468,27 @@ void Canvas::efface(){
   else if (horizontal.size() == 5){
      couleur_new_bonbon = 20;
   }
-
+  
+  if (couleur_new_bonbon == 7){
+      couleur_new_bonbon = 0;
+  }
+  stop = false;
     if (horizontal.size() >= 3){
-      if (couleur_new_bonbon == 7){
-         couleur_new_bonbon = 0;
-       }
         for (unsigned long int i = 0; i < horizontal.size(); i++){
             int x = horizontal[i].get_center().x/80;
             int y = horizontal[i].get_center().y/80;
+            if(cells[x][y].get_color() > 7 && cells[x][y].get_color() < 14){ // bonbon rayer
+              for (int j = 0; j < 9; j++){
+                cells[j][y].set_color(couleur_new_bonbon);
+                //cells[x][j].deplace({x * 80,y*80});
+                stop = true;
+                couleur_new_bonbon = 0;
+              }
+            }else if (!stop){
             cells[x][y].set_color(couleur_new_bonbon);
-            cells[x][y].deplace({x*80,y*80});
+            //cells[x][y].deplace({x * 80,y*80});
             couleur_new_bonbon = 0;
+            }
         }
     }
 
@@ -606,7 +630,7 @@ void Canvas::deplacement(Cell *c){
         
         if (a_coter(x0, y0, x1, y1) && !verif_mur(x0, y0, x1, y1)){
 
-          cout << "couleur " << liste[0]->get_color();
+          cout << "couleur " << liste[0]->get_color() << " ";
           cout << "couleur " << liste[1]->get_color() << endl;
 
             change_2_bombon(x0, y0, x1, y1); // change bombom sur le terminal 
@@ -642,7 +666,6 @@ void Canvas::deplacement(Cell *c){
             }
 
             if (!res && !res_1){
-                cout << "ICIIII FD" << endl;
                 change_2_bombon(x1, y1, x0, y0);
                 echange_bonbon(liste);
             }
@@ -690,6 +713,9 @@ void Canvas::tomber_fruits(){
           if (j==0){
               int fruit = rand() %(6-1) + 1;
               cells[i][j].set_color(fruit);
+              if (i+1 < 9 && cells[i][j].get_color() == cells[i+1][j].get_color() || cells[i][j].get_color() == cells[i][j+1].get_color() ){
+                cells[i][j].set_color(0);
+              }
           }else{
             // vérifie si c'est un mur 
             if (cells[i][j-1].get_color()==7){
@@ -712,20 +738,23 @@ void Canvas::tomber_fruits(){
 void Canvas::super_bonbon(int x1, int y1, int x0, int y0){
   for (int i = 0; i< 9; i++){
     for (int j = 0; j < 9; j++){
-      if (cells[i][j].get_color() ==  cells[x1][y1].get_color() && cells[x1][y1].get_color() != 20){
+      // efface tt les couleur du bonbon 
+      if (cells[x1][y1].get_color() != 20 &&  cells[i][j].get_color() ==  cells[x1][y1].get_color() || cells[i][j].get_color()-7 == cells[x1][y1].get_color() || cells[i][j].get_color()-13 == cells[x1][y1].get_color()){
         if (i == x1 && j == y1){
           continue;
         }else{
           cells[i][j].set_color(0);
         }
       }
-      else if (cells[i][j].get_color() ==  cells[x0][y0].get_color() && cells[x0][y0].get_color() != 20){
+      // efface tt les couleur du bonbon
+      else if (cells[x0][y0].get_color() != 20 &&  cells[i][j].get_color() ==  cells[x0][y0].get_color() || cells[i][j].get_color()-7 == cells[x0][y0].get_color() || cells[i][j].get_color()-13 == cells[x0][y0].get_color()){
         if (i == x0 && j == y0){
           continue;
         }else{
           cells[i][j].set_color(0);
         }
       }
+      // manque juste a rajouter 2 condition pour bonbon et bonbon rayer et bonbobn et sachet !!! 
     }
   }
   cells[x0][y0].set_color(0);
