@@ -257,13 +257,12 @@ class Canvas {
   bool verifie_pas_0(); // verifie qu'il n'y a plus de case vide 
   void lire_fichier(const char* fichier_input); // prend un fichier pour construire plateau
   bool verif_mur(int x0,int y0,int x1,int y1); // vérifie si c'est un mur
-  bool verifie_mouvement_possible_diagonal(); // vérifie si il y a des mouvements possible
-  bool verifie_mouvement_possible_vertical();
-  bool verifie_mouvement_possible_horizontal();
-  bool verifie_mouvement_possible();
-  void super_bonbon(int x1, int y1, int x0, int y0);
-  bool a_coter_diagonal(int x0, int y0, int x1, int y1);
-
+  void super_bonbon(int x1, int y1, int x0, int y0); // fait fonctionner le bonbon multicoulour
+  bool a_coter_diagonal(int x0, int y0, int x1, int y1); // verfie si le bonbon est a coter d'un  autre bonbon en diagonal
+  void reset_plateau(); // cree une nouveau plateau aleatoire
+  bool verifie_mouvement_possible_officiel(); // verifie qu'il reste des mouve possible
+  void efface_alligner_nouveau(); // utile pour reset
+  
   };
 
 
@@ -433,154 +432,155 @@ void Canvas::efface(){
   bool stop = false;
 
 // cree bonbon special si possible
-  if (vertical.size() == 4){
-    couleur_ancien = vertical[0].get_color();
-    couleur_new_bonbon =  couleur_ancien+7;
-  }
-  else if (vertical.size() == 3 && horizontal.size() == 3 && vertical[0].get_color() == horizontal[0].get_color()){
-   couleur_ancien = vertical[0].get_color();
-   couleur_new_bonbon =  couleur_ancien+13;
-
-  }
-  else if (vertical.size() == 5){
-     couleur_new_bonbon = 20;
-  }
   
-  if (couleur_new_bonbon == 7){
-      couleur_new_bonbon = 0;
-  }
-    
-    // VIOR SI ON PEUX CHANGER 
-    if (vertical.size() >= 3 && vertical[0].get_color() != 0){
-       
-        for (unsigned long int i = 0; i < vertical.size(); i++){
+  // cree bonbon embaler
+  if ( (vertical.size() == 3 || vertical.size() == 4) && (horizontal.size() == 3 || horizontal.size() == 4) && horizontal[0].get_color() == vertical[0].get_color() ){
+    couleur_ancien = vertical[0].get_color();
+    couleur_new_bonbon =  couleur_ancien+13;
+    for (unsigned long int i = 0; i < horizontal.size(); i++){
+        int x = horizontal[i].get_center().x/80;
+        int y = horizontal[i].get_center().y/80;
+        if (cells[x][y].get_color() == 7){
+          continue;}
+        cells[x][y].set_color(0);
+    }
+    for (unsigned long int i = 0; i < vertical.size(); i++){
             int x = vertical[i].get_center().x/80;
             int y = vertical[i].get_center().y/80;
-            if(cells[x][y].get_color() > 7 && cells[x][y].get_color() < 14){ // bonbon rayer 
-              for (int j = 0; j < 9; j++){
-                if (cells[x][j].get_color() == 7){
-                  continue;
-                }else{
-                  cells[x][j].set_color(couleur_new_bonbon);
-                }
-                //cells[x][j].deplace({x * 80,y*80});
-                stop = true;
-                couleur_new_bonbon = 0;
-              }
-            }
-            
-            else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
-              cells[x][y].set_color(0);
-              if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
-                cells[x+1][y].set_color(0);
-              }
-              if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
-                cells[x][y+1].set_color(0);
-              }
-              if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
-                cells[x-1][y].set_color(0);
-              }
-              if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
-                cells[x][y-1].set_color(0);
-              }
-              if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
-                cells[x+1][y+1].set_color(0);
-              }
-              if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
-                cells[x-1][y-1].set_color(0);
-              }
-              if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
-                 cells[x+1][y-1].set_color(0);
-              }
-              if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
-                 cells[x-1][y+1].set_color(0);
-              }
-            }
-            
-            else if (!stop){
-            cells[x][y].set_color(couleur_new_bonbon);
-            cells[x][y].deplace({x * 80,y*80});
-            couleur_new_bonbon = 0;
-            }
-         }
-      }
-
-//cree bobnon specila si possible
-  if (horizontal.size() == 4){
-    couleur_ancien = horizontal[0].get_color();
-    couleur_new_bonbon = couleur_ancien+7;
-  }
-  else if (vertical.size() == 3 && horizontal.size() == 3 && vertical[0].get_color() == horizontal[0].get_color()){
-   couleur_ancien = vertical[0].get_color();
-   couleur_new_bonbon =  couleur_ancien+13;
-  }
-  else if (horizontal.size() == 5){
-     couleur_new_bonbon = 20;
+            if (cells[x][y].get_color() == 7){
+              continue;}
+            cells[x][y].set_color(0);
+    }
+    cells[ horizontal[0].get_center().x/80 ][ horizontal[0].get_center().y/80 ].set_color(couleur_new_bonbon);
   }
   
-  if (couleur_new_bonbon == 7){
-    couleur_new_bonbon = 0;
-  }
-  stop = false;
-    if (horizontal.size() >= 3 && horizontal[0].get_color() != 0){
+  else{
+      if (vertical.size() == 4){
+        couleur_ancien = vertical[0].get_color();
+        couleur_new_bonbon =  couleur_ancien+7;
+      }
+
+      else if (vertical.size() == 5){
+        couleur_new_bonbon = 20;
+      }
+      
+      if (couleur_new_bonbon == 7){
+        couleur_new_bonbon = 0;
+      }
         
-        for (unsigned long int i = 0; i < horizontal.size(); i++){
-            int x = horizontal[i].get_center().x/80;
-            int y = horizontal[i].get_center().y/80;
-            if(cells[x][y].get_color() > 7 && cells[x][y].get_color() < 14){ // bonbon rayer
-              for (int j = 0; j < 9; j++){
-                if (cells[j][y].get_color() == 7){
-                  continue;
-                }else{
-                  cells[j][y].set_color(couleur_new_bonbon);
+        // VIOR SI ON PEUX CHANGER 
+      if (vertical.size() >= 3 && vertical[0].get_color() != 0){
+            for (unsigned long int i = 0; i < vertical.size(); i++){
+                int x = vertical[i].get_center().x/80;
+                int y = vertical[i].get_center().y/80;
+                if(cells[x][y].get_color() > 7 && cells[x][y].get_color() < 14){ // bonbon rayer 
+                  for (int j = 0; j < 9; j++){
+                    if (cells[x][j].get_color() == 7){
+                      continue;
+                    }else{
+                      cells[x][j].set_color(couleur_new_bonbon);
+                    }
+                    stop = true;
+                    couleur_new_bonbon = 0;
+                  }
+                  print();
                 }
-                //cells[x][j].deplace({x * 80,y*80});
-                stop = true;
+                else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
+                    cells[x][y].set_color(couleur_new_bonbon);
+                    if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
+                      cells[x+1][y].set_color(0);}
+                    if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
+                      cells[x][y+1].set_color(0);}
+                    if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
+                      cells[x-1][y].set_color(0);}
+                    if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
+                      cells[x][y-1].set_color(0);}
+                    if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
+                      cells[x+1][y+1].set_color(0);}
+                    if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
+                      cells[x-1][y-1].set_color(0);}
+                    if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
+                      cells[x+1][y-1].set_color(0);}
+                    if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
+                      cells[x-1][y+1].set_color(0);}
+                    
+                    couleur_new_bonbon = 0;
+                }
+                
+                else if (!stop){
+                cells[x][y].set_color(couleur_new_bonbon);
+                //cells[x][y].deplace({x * 80,y*80});
                 couleur_new_bonbon = 0;
-              }
-            
-            
-            
+                }
             }
-            
-            else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
-              cells[x][y].set_color(0);
-              if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
-                cells[x+1][y].set_color(0);
-              }
-              if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
-                cells[x][y+1].set_color(0);
-              }
-              if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
-                cells[x-1][y].set_color(0);
-              }
-              if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
-                cells[x][y-1].set_color(0);
-              }
-              if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
-                cells[x+1][y+1].set_color(0);
-              }
-              if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
-                cells[x-1][y-1].set_color(0);
-              }
-              if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
-                 cells[x+1][y-1].set_color(0);
-              }
-              if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
-                 cells[x-1][y+1].set_color(0);
-              }
-            }
-            
-            else if (!stop){
-            cells[x][y].set_color(couleur_new_bonbon);
-            cells[x][y].deplace({x * 80,y*80});
-            couleur_new_bonbon = 0;
+          }
+
+
+
+
+    //cree bobnon specila si possible
+      if (horizontal.size() == 4){
+        couleur_ancien = horizontal[0].get_color();
+        couleur_new_bonbon = couleur_ancien+7;
+      }
+
+      else if (horizontal.size() == 5){
+        couleur_new_bonbon = 20;
+      }
+      
+      if (couleur_new_bonbon == 7){
+        couleur_new_bonbon = 0;
+      }
+      
+      if (horizontal.size() >= 3 && horizontal[0].get_color() != 0){
+            stop = false;
+            for (unsigned long int i = 0; i < horizontal.size(); i++){
+                int x = horizontal[i].get_center().x/80;
+                int y = horizontal[i].get_center().y/80;
+                if (cells[x][y].get_color() > 7 && cells[x][y].get_color() < 14){ // bonbon rayer
+                  for (int j = 0; j < 9; j++){
+                    if (cells[j][y].get_color() == 7){
+                      continue;
+                    }else{
+                      cells[j][y].set_color(couleur_new_bonbon);
+                    }
+                    stop = true;
+                    couleur_new_bonbon = 0;
+                  }
+                }
+                
+                else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
+                    cells[x][y].set_color(couleur_new_bonbon);
+                    if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
+                      cells[x+1][y].set_color(0);}
+                    if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
+                      cells[x][y+1].set_color(0);}
+                    if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
+                      cells[x-1][y].set_color(0);}
+                    if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
+                      cells[x][y-1].set_color(0);}
+                    if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
+                      cells[x+1][y+1].set_color(0);}
+                    if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
+                      cells[x-1][y-1].set_color(0);}
+                    if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
+                      cells[x+1][y-1].set_color(0);}
+                    if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
+                      cells[x-1][y+1].set_color(0);}
+                    couleur_new_bonbon = 0;
+                 }
+                
+                else if (!stop){
+                  cells[x][y].set_color(couleur_new_bonbon);
+                  //cells[x][y].deplace({x * 80,y*80});
+                  couleur_new_bonbon = 0;
+                }
             }
         }
-    }
-    
-    horizontal.clear();
-    vertical.clear();
+  } 
+   
+  horizontal.clear();
+  vertical.clear();
 
 }
 
@@ -739,20 +739,26 @@ void Canvas::deplacement(Cell *c){
             efface();
             res_1 = alligner(cells[x1][y1]);
             efface();
-            Fl::wait();
            }
            
            print();
 
+           /*
            for (int i =0; i < 9; i++){
              for (int j=0; j < 9; j++){
                cases.push_back(&cells[i][j]);
               }
             }
+            */
             
 
            
            while(!verifie_pas_0()){
+             for (int i =0; i < 9; i++){
+             for (int j=0; j < 9; j++){
+               cases.push_back(&cells[i][j]);
+              }
+            }
              tomber_fruits();
              for (int i = 0; i < 9 ; i++){
                 for (int j = 0; j< 9; j++){
@@ -768,6 +774,12 @@ void Canvas::deplacement(Cell *c){
             }
             print();
             liste.clear();
+            
+            if (!verifie_mouvement_possible_officiel()){
+              fl_message(" Il n'y a plus de mouvement, les bonbons vont être remplacé aléatoirement.");
+              reset_plateau();
+            }
+            
 
         }else{
             liste.clear();
@@ -775,17 +787,6 @@ void Canvas::deplacement(Cell *c){
         } 
         
     }
-
-    /* fait beug par rapport a tache 5
-    if (!verifie_mouvement_possible()){
-        cout << "jsuis la" << endl;
-        fl_message(" Il n'y a plus de mouvement, les bonbons vont être remplacé aléatoirement.");
-        test();
-        
-    } 
-    */
-    
-
     
 }
 
@@ -830,32 +831,134 @@ void Canvas::tomber_fruits(){
 }
 
 void Canvas::super_bonbon(int x1, int y1, int x0, int y0){
+  bool rayer = false;
+  bool emballer = false;
+  int sauve = 0;
+  bool reset = cells[x1][y1].get_color() == 20 && cells[x0][y0].get_color() == 20;
   for (int i = 0; i< 9; i++){
     for (int j = 0; j < 9; j++){
+      if(reset){
+        if (cells[i][j].get_color() != 7)
+          cells[i][j].set_color(0);
+      }
       // efface tt les couleur du bonbon 
-      if (cells[x1][y1].get_color() != 20 &&  cells[i][j].get_color() ==  cells[x1][y1].get_color() || cells[i][j].get_color()-7 == cells[x1][y1].get_color() || cells[i][j].get_color()-13 == cells[x1][y1].get_color()){
+      else if (cells[x1][y1].get_color() != 20 && cells[i][j].get_color() ==  cells[x1][y1].get_color()){  
         if (i == x1 && j == y1){
           continue;
         }else{
           cells[i][j].set_color(0);
         }
       }
-      // efface tt les couleur du bonbon
-      else if (cells[x0][y0].get_color() != 20 &&  cells[i][j].get_color() ==  cells[x0][y0].get_color() || cells[i][j].get_color()-7 == cells[x0][y0].get_color() || cells[i][j].get_color()-13 == cells[x0][y0].get_color()){
+      else if (cells[x0][y0].get_color() != 20 && cells[i][j].get_color() ==  cells[x0][y0].get_color()){ 
         if (i == x0 && j == y0){
           continue;
         }else{
           cells[i][j].set_color(0);
         }
+      } 
+      
+      // donne les rayure a tt les bonon et les suprime 
+      else if (cells[x0][y0].get_color() != 20 && cells[i][j].get_color()+7 ==  cells[x0][y0].get_color()){
+        if (i == x0 && j == y0){
+          continue;
+        }else{
+          cells[i][j].set_color(cells[x0][y0].get_color());
+        }  
+        rayer = true;
+        sauve = cells[x0][y0].get_color();
+      } 
+      else if (cells[x1][y1].get_color() != 20 && cells[i][j].get_color()+7 ==  cells[x0][y0].get_color()){
+        if (i == x1 && j == y1){
+          continue;
       }
-      // manque juste a rajouter 2 condition pour bonbon et bonbon rayer et bonbobn et sachet !!! 
+      else{
+          cells[i][j].set_color(cells[x1][y1].get_color());
+        }
+        rayer = true;
+        sauve = cells[x1][y1].get_color();
+      }
+
+       // donne les embalage a tt les bonbon et les suprime 
+      else if (cells[x0][y0].get_color() != 20 && cells[i][j].get_color()+13 ==  cells[x0][y0].get_color()){
+        if (i == x0 && j == y0){
+          continue;
+      }
+      else{
+          cells[i][j].set_color(cells[x0][y0].get_color());
+        }
+        emballer = true;
+        sauve = cells[x0][y0].get_color();
+      } // donne les embalage a tt les bonbon et les suprime 
+      else if (cells[x1][y1].get_color() != 20 && cells[i][j].get_color()+13 ==  cells[x0][y0].get_color()){
+        if (i == x1 && j == y1){
+          continue;
+      }
+      else{
+          cells[i][j].set_color(cells[x1][y1].get_color());
+        }
+        emballer = true;
+        sauve = cells[x1][y1].get_color();
+      }
     }
   }
+  printf("wesh");
+  print();
+  if (rayer){
+    
+    for (int i = 0; i < 9; i++){
+       for (int j = 0; j < 9; j++){
+         if (cells[i][j].get_color() == sauve){
+           if (j % 2 == 1){
+            for (int x = 0; x < 9; x++){ // vertical 
+              if (cells[x][j].get_color() == 7){
+                continue;
+              }else{
+                cells[x][j].set_color(0);}
+            }
+           }
+           else{
+             for (int y = 0; y < 9; y++){ // horizontal 
+              if (cells[i][y].get_color() == 7){
+                continue;
+                }else{
+                  cells[i][y].set_color(0);}
+              }
+            }
+           }
+          }
+        }
+      }
+  
+  if (emballer){
+    
+    for (int x = 0; x < 9; x++){
+       for (int y = 0; y < 9; y++){
+         if (cells[x][y].get_color() == sauve){
+          cells[x][y].set_color(0);
+          if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
+            cells[x+1][y].set_color(0);}
+          if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
+            cells[x][y+1].set_color(0);}
+          if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
+            cells[x-1][y].set_color(0);}
+          if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
+            cells[x][y-1].set_color(0);}
+          if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
+            cells[x+1][y+1].set_color(0);}
+          if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
+            cells[x-1][y-1].set_color(0);}
+          if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
+            cells[x+1][y-1].set_color(0);}
+          if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
+            cells[x-1][y+1].set_color(0);}
+         }
+       }
+     }
+    }
+
   cells[x0][y0].set_color(0);
   cells[x1][y1].set_color(0);
 }
-
-
 
 
 
@@ -887,98 +990,7 @@ void Canvas::keyPressed(int keyCode) {
   }
 }
 
-
-
-
-
-/* Pour tache 5 voir pq beug ?
-bool Canvas::verifie_mouvement_possible_diagonal(){
-  // vérifie si il y a un mouvement possible sur les diagonales.
-  bool move_possible=false;
-  for (int i = 1; i < 8; i++){
-      for (int j = 1; j< 8; j++){
-        if(cells[i][j].get_color() == cells[i+1][j+1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
-          move_possible=true;
-       }
-        else if(cells[i][j].get_color() == cells[i+1][j+1].get_color() && cells[i][j].get_color() == cells[i+1][j-1].get_color()  ){
-           move_possible=true;
-         }
-        else if(cells[i][j].get_color() == cells[i-1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
-           move_possible=true;
-          }
-        else  if(cells[i][j].get_color() == cells[i+1][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()  ){
-           move_possible=true;
-        }
-    } 
- } return move_possible;
-}
-
-bool Canvas::verifie_mouvement_possible_vertical(){
-    bool move_possible=false;
-
-    for (int i = 0; i < 9; i++){
-      for (int j = 0; j< 9; j++){
-
-        if(i-1 >= 0 && j+1 <= 9 && j-1 >=0 && cells[i][j].get_color() == cells[i][j-1].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()){
-           move_possible=true;
-        }
-        else if(i+1 <= 9 && j+1 <= 9 && j-1 >=0 && cells[i][j].get_color() == cells[i][j-1].get_color() && cells[i][j].get_color() == cells[i+1][j+1].get_color()){
-           move_possible=true;
-        }
-        else if(j+2 <= 9 && j-1 >=0 && cells[i][j].get_color() == cells[i][j-1].get_color() && cells[i][j].get_color() == cells[i][j+2].get_color()){
-           move_possible=true;
-        }
-        else if(i-1 >= 0 && j+1 <= 9 && j-1 >=0 && cells[i][j].get_color() == cells[i][j+1].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()){
-           move_possible=true;
-        }
-        else if(i+1 <= 9 && j+1 <= 9 && j-1 >=0 && cells[i][j].get_color() == cells[i][j+1].get_color() && cells[i][j].get_color() == cells[i+1][j-1].get_color()){
-           move_possible=true;
-        }
-        else if(j+1 <= 9 && j-2 >=0 && cells[i][j].get_color() == cells[i][j+1].get_color() && cells[i][j].get_color() == cells[i][j-2].get_color()){
-           move_possible=true;
-        }
-      }
-    } return move_possible;
-}  
-
-bool Canvas::verifie_mouvement_possible_horizontal(){
-    bool move_possible=false;
-    for (int i = 0; i < 9; i++){
-      for (int j = 0; j< 9; j++){
-        
-        if(i-1 >= 0 && i+1 <= 9 && j-1 >=0 && cells[i][j].get_color() == cells[i-1][j].get_color() && cells[i][j].get_color() == cells[i+1][j-1].get_color()  ){
-           move_possible=true;
-        }
-        else if(i-1 >= 0 && i+1 <= 9 && j+1 <= 9 && cells[i][j].get_color() == cells[i-1][j].get_color() && cells[i][j].get_color() == cells[i+1][j+1].get_color()  ){
-           move_possible=true;
-        }
-        else if(i-1 >= 0 && i+2 <= 9 && cells[i][j].get_color() == cells[i-1][j].get_color() && cells[i][j].get_color() == cells[i+2][j].get_color()  ){
-           move_possible=true;
-        }
-        else if(i-2 >= 0 && i+1 <= 9 && cells[i][j].get_color() == cells[i+1][j].get_color() && cells[i][j].get_color() == cells[i-2][j].get_color()  ){
-           move_possible=true;
-        }
-        else if(i-1 >= 0 && i+1 <= 9 && j+1 <= 9 && cells[i][j].get_color() == cells[i+1][j].get_color() && cells[i][j].get_color() == cells[i-1][j+1].get_color()  ){
-           move_possible=true;
-        }
-        else if(i-1 >= 0 && i+1 <= 9 && j-1 >=0 && cells[i][j].get_color() == cells[i+1][j].get_color() && cells[i][j].get_color() == cells[i-1][j-1].get_color()  ){
-           move_possible=true;
-        }
-
-      }
-    }return move_possible;
-}
-
-bool Canvas::verifie_mouvement_possible(){
-    bool res = false;
-    cout << "ici";
-    if ( verifie_mouvement_possible_diagonal() || verifie_mouvement_possible_vertical() || verifie_mouvement_possible_horizontal() ){
-        res= true;
-    }
-    return res;
-}
-
-void Canvas::test(){
+void Canvas::reset_plateau(){
   for (int i= 0; i < 9; i++){
        for (int j = 1; j < 9; j++){
            if (cells[i][j].get_color() != 7){
@@ -986,7 +998,7 @@ void Canvas::test(){
                cells[i][j].set_color(fruit);
            }
            if (alligner(cells[i][j])){
-            efface();
+            efface_alligner_nouveau();
             }
        }
   }
@@ -995,16 +1007,111 @@ void Canvas::test(){
     for (int i = 0; i < 9 ; i++){
       for (int j = 0; j< 9; j++){
         alligner(cells[i][j]);
-        efface();
+        efface_alligner_nouveau();
       } 
     }
   }
 }
-*/
 
+bool Canvas::verifie_mouvement_possible_officiel(){
+  for (int i = 1; i < 8; i++){
+      for (int j = 1; j< 8; j++){
+        horizontal.clear();
+        vertical.clear();
+        liste.push_back(&cells[i][j]);
+        liste.push_back(&cells[i+1][j]);
+        change_2_bombon( i, j,i+1 ,j);
+        echange_bonbon(liste);
+        if(alligner(cells[i][j])){
+          change_2_bombon( i+1, j,i ,j);
+          echange_bonbon(liste);
+          liste.clear();
+          return true;
+        }
+        change_2_bombon( i+1, j,i ,j);
+        echange_bonbon(liste);
+        liste.clear();
+        /////////////////////////////////////////////////////////////
+        horizontal.clear();
+        vertical.clear();
+        liste.push_back(&cells[i][j]);
+        liste.push_back(&cells[i-1][j]);
+        change_2_bombon( i, j, i-1 ,j);
+        echange_bonbon(liste);
+        if (alligner(cells[i][j])){
+          change_2_bombon( i-1, j,i ,j);
+        echange_bonbon(liste);
+        liste.clear();
+          return true;
+        }
+        change_2_bombon( i-1, j,i ,j);
+        echange_bonbon(liste);
+        liste.clear();
+        /////////////////////////////////////////////////////////////
+        liste.push_back(&cells[i][j]);
+        liste.push_back(&cells[i][j-1]);
+        horizontal.clear();
+        vertical.clear();
+        change_2_bombon( i, j,i ,j-1);
+        echange_bonbon(liste);
+        if (alligner(cells[i][j])){
+          change_2_bombon( i, j-1,i ,j);
+          echange_bonbon(liste);
+          liste.clear();
+          return true;
+        }
+        change_2_bombon( i, j-1,i ,j);
+        echange_bonbon(liste);
+        liste.clear();
+        /////////////////////////////////////////////////////////////
+        liste.push_back(&cells[i][j]);
+        liste.push_back(&cells[i][j+1]);
+        horizontal.clear();
+        vertical.clear();
+        change_2_bombon( i, j,i ,j+1);
+        echange_bonbon(liste);
+        if (alligner(cells[i][j])){
+          change_2_bombon( i, j+1,i ,j);
+          echange_bonbon(liste);
+          liste.clear();
+          return true;
+        }
+        change_2_bombon( i, j+1,i ,j);
+        echange_bonbon(liste);
+        /////////////////////////////////////////////////////////////
+        liste.clear();
+        horizontal.clear();
+        vertical.clear();
+     }
+    
+   }
+   return false;
+}
 
+void Canvas::efface_alligner_nouveau(){
+    // VIOR SI ON PEUX CHANGER 
+    if (vertical.size() >= 3){
+        for (int i = 0; i < vertical.size(); i++){
+            int x = vertical[i].get_center().x/80;
+            int y = vertical[i].get_center().y/80;
+            cells[x][y].set_color(0);
+            cells[x][y].deplace({x * 80,y*80});
+        }
+    }
 
+    if (horizontal.size() >= 3){
+        for (int i = 0; i < horizontal.size(); i++){
+            int x = horizontal[i].get_center().x/80;
+            int y = horizontal[i].get_center().y/80;
+            cells[x][y].set_color(0);
+            cells[x][y].deplace({x*80,y*80});
+        }
+    }
 
+    horizontal.clear();
+    vertical.clear();
+
+}
 
 
 
@@ -1022,6 +1129,7 @@ void Canvas::test(){
  * Pas toucher 
  */
 
+
 class MainWindow : public Fl_Window {
   Canvas canvas;
  public:
@@ -1037,15 +1145,15 @@ class MainWindow : public Fl_Window {
       case FL_MOVE:
         canvas.mouseMove(Point{Fl::event_x(), Fl::event_y()});
         return 1;
-      //case FL_PUSH:
-        //canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-        //return 1;
+      case FL_PUSH:
+        canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+        return 1;
       case FL_KEYDOWN:
         canvas.keyPressed(Fl::event_key());
         return 1;
-      case FL_DRAG:
-        canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-		    return 1;
+      //case FL_DRAG:
+        //canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+		    //return 1;
 
     }
     return 0;
