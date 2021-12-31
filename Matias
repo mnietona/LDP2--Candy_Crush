@@ -206,54 +206,31 @@ Point Cell::get_center() const{
   return center;
 }
 
+
+
 /**
  * 
  * 
  */
-class Mouvement {
+class Effacer_bonbon{
+    public:
     vector<Cell > horizontal;
     vector<Cell > vertical;
-    vector<Cell *> liste;
-
-    public:
     vector< vector<Cell> > cells;
-    void print();
     bool a_coter(int x0, int y0, int x1, int y1);
     bool a_coter_diagonal(int x0, int y0, int x1, int y1);
-    void change_2_bombon(int x0, int y0, int x1, int y1);
-    void echange_bonbon(vector<Cell *> &liste);
-    void deplacement(Cell *c); 
-    bool alligner_horizontal(Cell horizontal); 
-    bool alligner_vertical(Cell vertical); 
-    bool alligner(Cell c); 
-    void efface();
-    void tomber_fruits(); 
-    bool verifie_pas_0();
-    bool verif_mur(int x0,int y0,int x1,int y1);
     void super_bonbon(int x1, int y1, int x0, int y0);
-    void efface_alligner_aleatoire();
     void pouvoir_rayer(int sauve);
     void pouvoir_emballer(int x, int y);
     void condition_super_bonbon(int i, int j, int x, int y, int sauve);
+    void efface();
     int couleur_special(vector<Cell > position, int couleur_new_bonbon );
     void couleur_bonbon_emballer(); 
     void efface_vertical_horizontal(vector<Cell > position,int couleur_new_bonbon, string direction);
+
 };
 
-void Mouvement::print(){
-
-  cout << "\n" << endl;
-  for (int i = 0; i < 9; i++){
-    for (int j = 0; j < 9; j++){
-            cout<<"[" << cells[j][i].get_color() << "]; "; // on met j i opur avoir les meme position que fltk
-        }
-        cout<<"\n" << endl;
-  }
-  cout << endl;
-  
-}
-
-bool Mouvement:: a_coter(int x0, int y0, int x1, int y1){
+bool Effacer_bonbon:: a_coter(int x0, int y0, int x1, int y1){
 
     bool coter = false;
 
@@ -273,7 +250,7 @@ bool Mouvement:: a_coter(int x0, int y0, int x1, int y1){
     return coter;
 }
 
-bool Mouvement:: a_coter_diagonal(int x0, int y0, int x1, int y1){
+bool Effacer_bonbon:: a_coter_diagonal(int x0, int y0, int x1, int y1){
 
     bool coter = false;
 
@@ -291,6 +268,234 @@ bool Mouvement:: a_coter_diagonal(int x0, int y0, int x1, int y1){
     }
 
     return coter;
+}
+
+void Effacer_bonbon::super_bonbon(int x1, int y1, int x0, int y0){
+  bool rayer = false;
+  bool emballer = false;
+  bool reset = cells[x1][y1].get_color() == 20 && cells[x0][y0].get_color() == 20;
+  int sauve = 0;
+
+  for (int i = 0; i< 9; i++){
+    for (int j = 0; j < 9; j++){
+      if(reset){  // Si 2 bonbon de super bonbon selectionner alors reset plateau 
+        if (cells[i][j].get_color() != 7)
+          cells[i][j].set_color(0); }
+      else if ( (cells[x1][y1].get_color() != 20 && cells[i][j].get_color() ==  cells[x1][y1].get_color()) || (cells[x0][y0].get_color() != 20 && cells[i][j].get_color() ==  cells[x0][y0].get_color()) ){  // si super bonbon avec un bonbon normal
+        if ((i != x1 && j != y1) || (i != x0 && j != y0) ){
+          cells[i][j].set_color(0); } // met tt les bonbons de la couleur a 0 
+      }else if (cells[x0][y0].get_color() != 20 && cells[i][j].get_color()+7 ==  cells[x0][y0].get_color()){ // Si un super bonbon et un bonbon rayer
+        sauve = cells[x0][y0].get_color();
+        condition_super_bonbon(i, j, x0, y0, sauve); // met bonbon a la couleur du rayer 
+        rayer = true;
+      }else if (cells[x1][y1].get_color() != 20 && cells[i][j].get_color()+7 ==  cells[x0][y0].get_color()){ // Si un super bonbon et un bonbon rayer
+        sauve = cells[x1][y1].get_color();
+        condition_super_bonbon(i, j, x1, y1, sauve);  // met bonbon a la couleur du rayer 
+        rayer = true;
+      }else if (cells[x0][y0].get_color() != 20 && cells[i][j].get_color()+13 ==  cells[x0][y0].get_color()){ // Si un super bonbon et un bonbon emballer 
+        sauve = cells[x0][y0].get_color();
+        condition_super_bonbon(i, j, x0, y0, sauve); // met bonbon a la couleur du remballer
+        emballer = true;
+      }else if (cells[x1][y1].get_color() != 20 && cells[i][j].get_color()+13 ==  cells[x0][y0].get_color()){ // Si un super bonbon et un bonbon emballer 
+        sauve = cells[x1][y1].get_color();
+        condition_super_bonbon(i, j, x1, y1, sauve); // met bonbon a la couleur du remballer
+        emballer = true; }
+    }
+  }
+  if (rayer)
+    pouvoir_rayer(sauve); // efface tt les bonbon rayer correctement 
+
+  if (emballer){
+    for (int x = 0; x < 9; x++){
+       for (int y = 0; y < 9; y++){
+           if (cells[x][y].get_color() == sauve){
+               pouvoir_emballer(x,y); // efface tt les bonbon emballer correctement
+           }
+       }
+    }
+  }
+
+  cells[x0][y0].set_color(0);
+  cells[x1][y1].set_color(0);
+}
+
+void Effacer_bonbon::pouvoir_rayer(int sauve){
+    for (int i = 0; i < 9; i++){
+       for (int j = 0; j < 9; j++){
+            if (cells[i][j].get_color() == sauve){
+                if (j % 2 == 1){
+                    for (int x = 0; x < 9; x++){ // vertical 
+                    if (cells[x][j].get_color() != 7){
+                        cells[x][j].set_color(0);} }
+                }else{
+                    for (int y = 0; y < 9; y++){ // horizontal 
+                    if (cells[i][y].get_color() != 7){
+                        cells[i][y].set_color(0);}  }
+                }
+            }
+        }
+    }
+}
+
+void Effacer_bonbon::pouvoir_emballer(int x, int y){
+    
+    cells[x][y].set_color(0);
+    if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
+        cells[x+1][y].set_color(0);}
+    if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
+        cells[x][y+1].set_color(0);}
+    if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
+        cells[x-1][y].set_color(0);}
+    if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
+        cells[x][y-1].set_color(0);}
+    if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
+        cells[x+1][y+1].set_color(0);}
+    if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
+        cells[x-1][y-1].set_color(0);}
+    if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
+        cells[x+1][y-1].set_color(0);}
+    if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
+        cells[x-1][y+1].set_color(0);}
+
+}
+
+void Effacer_bonbon::condition_super_bonbon(int i, int j, int x, int y, int sauve){
+    if (i != x && j != y){
+        cells[i][j].set_color(sauve);
+    }  
+}
+
+int Effacer_bonbon::couleur_special(vector<Cell > position, int couleur_new_bonbon ){
+    int couleur_ancien = 0;
+
+    if (position.size() == 4){
+        couleur_ancien = position[0].get_color();
+        couleur_new_bonbon =  couleur_ancien+7;
+    }
+
+    else if (position.size() == 5){
+        couleur_new_bonbon = 20;
+    }
+      
+    if (couleur_new_bonbon == 7){
+        couleur_new_bonbon = 0;
+    }
+    return couleur_new_bonbon;
+}
+
+void Effacer_bonbon::couleur_bonbon_emballer(){
+    
+    int ancien = vertical[0].get_color();
+    int new_bonbon =  ancien+13;
+
+    for (unsigned long int i = 0; i < horizontal.size(); i++){
+        int x = horizontal[i].get_center().x/80;
+        int y = horizontal[i].get_center().y/80;
+        if (cells[x][y].get_color() == 7){
+          continue;}
+        cells[x][y].set_color(0);
+    }
+    for (unsigned long int i = 0; i < vertical.size(); i++){
+            int x = vertical[i].get_center().x/80;
+            int y = vertical[i].get_center().y/80;
+            if (cells[x][y].get_color() == 7){
+              continue;}
+            cells[x][y].set_color(0);
+    }
+    cells[ horizontal[0].get_center().x/80 ][ horizontal[0].get_center().y/80 ].set_color(new_bonbon);
+  }
+
+void Effacer_bonbon::efface(){
+  int couleur_new_bonbon = 0;
+
+  // cree bonbon embaler et efface les ligne qu'il l'ont cree
+  if ( (vertical.size() == 3 || vertical.size() == 4) && (horizontal.size() == 3 || horizontal.size() == 4) && horizontal[0].get_color() == vertical[0].get_color() ){
+    couleur_bonbon_emballer(); }
+  
+  else{
+
+    couleur_new_bonbon = couleur_special(vertical, couleur_new_bonbon );
+
+    if (vertical.size() >= 3 && vertical[0].get_color() != 0){
+        efface_vertical_horizontal(vertical,couleur_new_bonbon,"vertical"); }
+      
+    couleur_new_bonbon = couleur_special(horizontal, couleur_new_bonbon );
+
+    if (horizontal.size() >= 3 && horizontal[0].get_color() != 0){
+        efface_vertical_horizontal(horizontal,couleur_new_bonbon,"horizontal"); }
+  } 
+   
+  horizontal.clear();
+  vertical.clear();
+
+}
+
+void Effacer_bonbon::efface_vertical_horizontal(vector<Cell > position,int couleur_new_bonbon, string direction){
+    int stop = false;
+    for (unsigned long int i = 0; i < position.size(); i++){
+        int x = position[i].get_center().x/80;
+        int y = position[i].get_center().y/80;
+
+        if(cells[x][y].get_color() > 7 && cells[x][y].get_color() < 14){ // Si bonbon rayer dans allignement fait son piuvoir  
+            
+            for (int j = 0; j < 9; j++){
+                if (direction == "vertical"){
+                    if (cells[x][j].get_color() != 7){
+                        cells[x][j].set_color(couleur_new_bonbon); }
+                }else if (direction == "horizontal"){
+                    if (cells[j][y].get_color() != 7){
+                        cells[j][y].set_color(couleur_new_bonbon);  }
+                }
+                stop = true;
+                couleur_new_bonbon = 0;
+            }
+        }
+        else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
+            pouvoir_emballer(x, y);
+            couleur_new_bonbon = 0;
+        }
+                
+        else if (!stop){
+            cells[x][y].set_color(couleur_new_bonbon);
+            couleur_new_bonbon = 0;
+        }
+    }
+}
+
+
+/**
+ * 
+ * 
+ */
+class Mouvement: public Effacer_bonbon{
+    vector<Cell *> liste;
+    public:
+    void print();
+    void change_2_bombon(int x0, int y0, int x1, int y1);
+    void echange_bonbon(vector<Cell *> &liste);
+    void deplacement(Cell *c); 
+    bool alligner_horizontal(Cell horizontal); 
+    bool alligner_vertical(Cell vertical); 
+    bool alligner(Cell c);
+    void tomber_fruits();
+    bool verifie_pas_0();
+    bool verif_mur(int x0,int y0,int x1,int y1);
+    void efface_alligner_aleatoire();
+
+    
+};
+
+void Mouvement::print(){
+
+  cout << "\n" << endl;
+  for (int i = 0; i < 9; i++){
+    for (int j = 0; j < 9; j++){
+            cout<<"[" << cells[j][i].get_color() << "]; "; // on met j i opur avoir les meme position que fltk
+        }
+        cout<<"\n" << endl;
+  }
+  cout << endl;
+  
 }
 
 void Mouvement::change_2_bombon(int x0, int y0, int x1, int y1){
@@ -311,7 +516,6 @@ void Mouvement::echange_bonbon(vector<Cell *> &liste){
     liste[1]->set_center(save_center);
 }
 
-// simplifier ?
 void Mouvement::deplacement(Cell *c){
 
     if (c->est_selectionner()){
@@ -326,7 +530,7 @@ void Mouvement::deplacement(Cell *c){
         int x1 = liste[1]->get_center().x/80;
         int y1 = liste[1]->get_center().y/80;
         
-        if (a_coter(x0, y0, x1, y1) && !verif_mur(x0, y0, x1, y1)){
+        if (Effacer_bonbon::a_coter(x0, y0, x1, y1) && !verif_mur(x0, y0, x1, y1)){
 
             change_2_bombon(x0, y0, x1, y1); 
             echange_bonbon(liste); 
@@ -335,14 +539,14 @@ void Mouvement::deplacement(Cell *c){
             bool res_1 = false;
             
             if (cells[x0][y0].get_color() == 20 || cells[x1][y1].get_color() == 20 ){
-              super_bonbon(x1,y1,x0,y0);
+              Effacer_bonbon::super_bonbon(x1,y1,x0,y0);
               res = true;
               res_1 = true;
             }else{
                 res = alligner(cells[x0][y0]);
-                efface();
+                Effacer_bonbon::efface();
                 res_1 = alligner(cells[x1][y1]);
-                efface();
+                Effacer_bonbon::efface();
             } 
             
             while(!verifie_pas_0()){
@@ -488,218 +692,14 @@ bool Mouvement::verif_mur(int x0,int y0,int x1,int y1){
   return res;
 }
 
-
-void Mouvement::super_bonbon(int x1, int y1, int x0, int y0){
-  bool rayer = false;
-  bool emballer = false;
-  bool reset = cells[x1][y1].get_color() == 20 && cells[x0][y0].get_color() == 20;
-  int sauve = 0;
-
-  for (int i = 0; i< 9; i++){
-    for (int j = 0; j < 9; j++){
-      if(reset){  // Si 2 bonbon de super bonbon selectionner alors reset plateau 
-        if (cells[i][j].get_color() != 7)
-          cells[i][j].set_color(0); }
-      else if ( (cells[x1][y1].get_color() != 20 && cells[i][j].get_color() ==  cells[x1][y1].get_color()) || (cells[x0][y0].get_color() != 20 && cells[i][j].get_color() ==  cells[x0][y0].get_color()) ){  // si super bonbon avec un bonbon normal
-        if ((i != x1 && j != y1) || (i != x0 && j != y0) ){
-          cells[i][j].set_color(0); } // met tt les bonbons de la couleur a 0 
-      }else if (cells[x0][y0].get_color() != 20 && cells[i][j].get_color()+7 ==  cells[x0][y0].get_color()){ // Si un super bonbon et un bonbon rayer
-        sauve = cells[x0][y0].get_color();
-        condition_super_bonbon(i, j, x0, y0, sauve); // met bonbon a la couleur du rayer 
-        rayer = true;
-      }else if (cells[x1][y1].get_color() != 20 && cells[i][j].get_color()+7 ==  cells[x0][y0].get_color()){ // Si un super bonbon et un bonbon rayer
-        sauve = cells[x1][y1].get_color();
-        condition_super_bonbon(i, j, x1, y1, sauve);  // met bonbon a la couleur du rayer 
-        rayer = true;
-      }else if (cells[x0][y0].get_color() != 20 && cells[i][j].get_color()+13 ==  cells[x0][y0].get_color()){ // Si un super bonbon et un bonbon emballer 
-        sauve = cells[x0][y0].get_color();
-        condition_super_bonbon(i, j, x0, y0, sauve); // met bonbon a la couleur du remballer
-        emballer = true;
-      }else if (cells[x1][y1].get_color() != 20 && cells[i][j].get_color()+13 ==  cells[x0][y0].get_color()){ // Si un super bonbon et un bonbon emballer 
-        sauve = cells[x1][y1].get_color();
-        condition_super_bonbon(i, j, x1, y1, sauve); // met bonbon a la couleur du remballer
-        emballer = true; }
-    }
-  }
-  if (rayer)
-    pouvoir_rayer(sauve); // efface tt les bonbon rayer correctement 
-
-  if (emballer){
-    for (int x = 0; x < 9; x++){
-       for (int y = 0; y < 9; y++){
-           if (cells[x][y].get_color() == sauve){
-               pouvoir_emballer(x,y); // efface tt les bonbon emballer correctement
-           }
-       }
-    }
-  }
-
-  cells[x0][y0].set_color(0);
-  cells[x1][y1].set_color(0);
-}
-
-void Mouvement::pouvoir_rayer(int sauve){
-    for (int i = 0; i < 9; i++){
-       for (int j = 0; j < 9; j++){
-            if (cells[i][j].get_color() == sauve){
-                if (j % 2 == 1){
-                    for (int x = 0; x < 9; x++){ // vertical 
-                    if (cells[x][j].get_color() != 7){
-                        cells[x][j].set_color(0);} }
-                }else{
-                    for (int y = 0; y < 9; y++){ // horizontal 
-                    if (cells[i][y].get_color() != 7){
-                        cells[i][y].set_color(0);}  }
-                }
-            }
-        }
-    }
-}
-
-void Mouvement::pouvoir_emballer(int x, int y){
-    cells[x][y].set_color(0);
-    if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
-        cells[x+1][y].set_color(0);}
-    if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
-        cells[x][y+1].set_color(0);}
-    if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
-        cells[x-1][y].set_color(0);}
-    if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
-        cells[x][y-1].set_color(0);}
-    if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
-        cells[x+1][y+1].set_color(0);}
-    if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
-        cells[x-1][y-1].set_color(0);}
-    if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
-        cells[x+1][y-1].set_color(0);}
-    if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
-        cells[x-1][y+1].set_color(0);}
-
-}
-
-void Mouvement::condition_super_bonbon(int i, int j, int x, int y, int sauve){
-    if (i != x && j != y){
-        cells[i][j].set_color(sauve);
-    }  
-}
-
 void Mouvement::efface_alligner_aleatoire(){
     for (int i = 0; i < 9 ; i++){
         for (int j = 0; j< 9; j++){
             alligner(cells[i][j]);
-            efface();
+            Effacer_bonbon::efface();
         } 
     }
 }
-
-// APPARTIENT A EFFACE
-int Mouvement::couleur_special(vector<Cell > position, int couleur_new_bonbon ){
-    int couleur_ancien = 0;
-
-    if (position.size() == 4){
-        couleur_ancien = position[0].get_color();
-        couleur_new_bonbon =  couleur_ancien+7;
-    }
-
-    else if (position.size() == 5){
-        couleur_new_bonbon = 20;
-    }
-      
-    if (couleur_new_bonbon == 7){
-        couleur_new_bonbon = 0;
-    }
-    return couleur_new_bonbon;
-}
-
-void Mouvement::couleur_bonbon_emballer(){
-    
-    int ancien = vertical[0].get_color();
-    int new_bonbon =  ancien+13;
-
-    for (unsigned long int i = 0; i < horizontal.size(); i++){
-        int x = horizontal[i].get_center().x/80;
-        int y = horizontal[i].get_center().y/80;
-        if (cells[x][y].get_color() == 7){
-          continue;}
-        cells[x][y].set_color(0);
-    }
-    for (unsigned long int i = 0; i < vertical.size(); i++){
-            int x = vertical[i].get_center().x/80;
-            int y = vertical[i].get_center().y/80;
-            if (cells[x][y].get_color() == 7){
-              continue;}
-            cells[x][y].set_color(0);
-    }
-    cells[ horizontal[0].get_center().x/80 ][ horizontal[0].get_center().y/80 ].set_color(new_bonbon);
-  }
-
-void Mouvement::efface(){
-  int couleur_new_bonbon = 0;
-
-  // cree bonbon embaler et efface les ligne qu'il l'ont cree
-  if ( (vertical.size() == 3 || vertical.size() == 4) && (horizontal.size() == 3 || horizontal.size() == 4) && horizontal[0].get_color() == vertical[0].get_color() ){
-    couleur_bonbon_emballer(); }
-  
-  else{
-
-    couleur_new_bonbon = couleur_special(vertical, couleur_new_bonbon );
-
-    if (vertical.size() >= 3 && vertical[0].get_color() != 0){
-        efface_vertical_horizontal(vertical,couleur_new_bonbon,"vertical"); }
-      
-    couleur_new_bonbon = couleur_special(horizontal, couleur_new_bonbon );
-
-    if (horizontal.size() >= 3 && horizontal[0].get_color() != 0){
-        efface_vertical_horizontal(horizontal,couleur_new_bonbon,"horizontal"); }
-  } 
-   
-  horizontal.clear();
-  vertical.clear();
-
-}
-
-void Mouvement::efface_vertical_horizontal(vector<Cell > position,int couleur_new_bonbon, string direction){
-    int stop = false;
-    for (unsigned long int i = 0; i < position.size(); i++){
-        int x = position[i].get_center().x/80;
-        int y = position[i].get_center().y/80;
-
-        if(cells[x][y].get_color() > 7 && cells[x][y].get_color() < 14){ // Si bonbon rayer dans allignement fait son piuvoir  
-            
-            for (int j = 0; j < 9; j++){
-                if (direction == "vertical"){
-                    if (cells[x][j].get_color() != 7){
-                        cells[x][j].set_color(couleur_new_bonbon); }
-                }else if (direction == "horizontal"){
-                    if (cells[j][y].get_color() != 7){
-                        cells[j][y].set_color(couleur_new_bonbon);  }
-                }
-                stop = true;
-                couleur_new_bonbon = 0;
-            }
-        }
-        else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
-            pouvoir_emballer(x, y)
-            couleur_new_bonbon = 0;
-        }
-                
-        else if (!stop){
-            cells[x][y].set_color(couleur_new_bonbon);
-            couleur_new_bonbon = 0;
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
 
 
 /**
