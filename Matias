@@ -166,8 +166,8 @@ void Rectangle::draw() {
 class TextRectangle : public Rectangle, public Text
 {
   public:
-  TextRectangle(Point center, int w, int h, string s) : 
-  Rectangle{center, w, h}, Text{s, center} {}
+  TextRectangle(Point center, int w, int h, string s, Fl_Color frameColor = FL_BLACK, Fl_Color fillColor = FL_WHITE) : 
+  Rectangle{center, w, h,frameColor, fillColor,}, Text{s, center} {}
   void draw();
  
 };
@@ -298,13 +298,59 @@ Point Cell::get_center() const{
 }
 
 
+/**
+ * 
+ * 
+ */
+class Scores{
+    int scores = 0;
+    public:
+    void score();
+    int get_score();
+    int lecture_fichier_score();
+    void ecrire_fichier_score();
+    void reset_score();
+    void moins_score();
+};
+
+void Scores::score(){
+    scores += 10;
+}
+
+int Scores::get_score(){
+    return scores;
+}
+
+void Scores::ecrire_fichier_score(){
+    string const nomFichier("meilleur_score.txt");
+    ofstream monFlux(nomFichier.c_str());
+    monFlux << scores << endl;
+}
+
+int Scores::lecture_fichier_score(){
+    ifstream fichier("meilleur_score.txt");
+    int jsp;
+    fichier >> jsp;
+    return jsp;
+}
+
+void Scores::reset_score(){
+    string const nomFichier("meilleur_score.txt");
+    ofstream monFlux(nomFichier.c_str());
+    monFlux << 0 << endl;
+}
+
+void Scores::moins_score(){
+    scores-=10;
+}
+
+
 
 /**
  * 
  * 
  */
-class Effacer_bonbon{
-    int scores = 0;
+class Effacer_bonbon: public Scores{
     public:
     vector<Cell > horizontal;
     vector<Cell > vertical;
@@ -319,12 +365,6 @@ class Effacer_bonbon{
     int couleur_special(vector<Cell > position, int couleur_new_bonbon );
     void couleur_bonbon_emballer(); 
     void efface_vertical_horizontal(vector<Cell > position,int couleur_new_bonbon, string direction);
-    void score();
-    int get_score();
-    int lecture_fichier_score();
-    void ecrire_fichier_score();
-    void reset_score();
-
 };
 
 bool Effacer_bonbon:: a_coter(int x0, int y0, int x1, int y1){
@@ -378,11 +418,11 @@ void Effacer_bonbon::super_bonbon(int x1, int y1, int x0, int y0){
       if(reset){  // Si 2 bonbon de super bonbon selectionner alors reset plateau 
         if (cells[i][j].get_color() != 7)
           cells[i][j].set_color(0); 
-          score();}
+          Scores::score();}
       else if ( (cells[x1][y1].get_color() != 20 && cells[i][j].get_color() ==  cells[x1][y1].get_color()) || (cells[x0][y0].get_color() != 20 && cells[i][j].get_color() ==  cells[x0][y0].get_color()) ){  // si super bonbon avec un bonbon normal
         if ((i != x1 && j != y1) || (i != x0 && j != y0) ){
           cells[i][j].set_color(0); 
-          score();} // met tt les bonbons de la couleur a 0 
+          Scores::score();} // met tt les bonbons de la couleur a 0 
       }else if (cells[x0][y0].get_color() != 20 && cells[i][j].get_color()+7 ==  cells[x0][y0].get_color()){ // Si un super bonbon et un bonbon rayer
         sauve = cells[x0][y0].get_color();
         condition_super_bonbon(i, j, x0, y0, sauve); // met bonbon a la couleur du rayer 
@@ -426,12 +466,12 @@ void Effacer_bonbon::pouvoir_rayer(int sauve){
                     for (int x = 0; x < 9; x++){ // vertical 
                     if (cells[x][j].get_color() != 7){
                         cells[x][j].set_color(0);} 
-                    score();  }
+                    Scores::score();  }
                 }else{
                     for (int y = 0; y < 9; y++){ // horizontal 
                     if (cells[i][y].get_color() != 7){
                         cells[i][y].set_color(0);} 
-                    score();  }
+                    Scores::score();  }
                 }
             }
         }
@@ -441,31 +481,31 @@ void Effacer_bonbon::pouvoir_rayer(int sauve){
 void Effacer_bonbon::pouvoir_emballer(int x, int y){
     
     cells[x][y].set_color(0);
-    score();
+    Scores::score();
     if (a_coter( x, y, x+1, y) && cells[x+1][y].get_color() != 7 ){
         cells[x+1][y].set_color(0);
-        score();}
+        Scores::score();}
     if ( a_coter(x, y, x, y+1) && cells[x][y+1].get_color() != 7 ){
         cells[x][y+1].set_color(0);
-        score();}
+        Scores::score();}
     if ( a_coter(x, y, x-1, y) && cells[x-1][y].get_color() != 7 ){
         cells[x-1][y].set_color(0);
-        score();}
+        Scores::score();}
     if (a_coter(x, y, x, y-1) && cells[x][y-1].get_color() != 7 ){
         cells[x][y-1].set_color(0);
-        score();}
+        Scores::score();}
     if (a_coter_diagonal(x, y, x+1, y+1) && cells[x+1][y+1].get_color() != 7 ){
         cells[x+1][y+1].set_color(0);
-        score();}
+        Scores::score();}
     if ( a_coter_diagonal(x, y, x-1, y-1) && cells[x-1][y-1].get_color() != 7 ){
         cells[x-1][y-1].set_color(0);
-        score();}
+        Scores::score();}
     if ( a_coter_diagonal(x, y, x+1, y-1) && cells[x+1][y-1].get_color() != 7){
         cells[x+1][y-1].set_color(0);
-        score();}
+        Scores::score();}
     if ( a_coter_diagonal(x, y, x-1, y+1) && cells[x-1][y+1].get_color() != 7){
         cells[x-1][y+1].set_color(0);
-        score();}
+        Scores::score();}
 
 }
 
@@ -505,20 +545,24 @@ void Effacer_bonbon::couleur_bonbon_emballer(){
     for (unsigned long int i = 0; i < horizontal.size(); i++){
         int x = horizontal[i].get_center().x/80;
         int y = horizontal[i].get_center().y/80;
-        if (cells[x][y].get_color() == 7){
-          continue;}
-        cells[x][y].set_color(0);
-        score();  // augmente le score pour chaque supression 
+        if (cells[x][y].get_color() != 7){
+            cells[x][y].set_color(0);
+            Scores::score();  // augmente le score pour chaque supression 
+        }else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
+            pouvoir_emballer(x, y);
+        }
     }
     for (unsigned long int i = 0; i < vertical.size(); i++){
             int x = vertical[i].get_center().x/80;
             int y = vertical[i].get_center().y/80;
-            if (cells[x][y].get_color() == 7){
-              continue;}
-            cells[x][y].set_color(0);
-            score();  // augmente le score pour chaque supression 
+            if (cells[x][y].get_color() != 7){
+                cells[x][y].set_color(0);
+                Scores::score();  // augmente le score pour chaque supression 
+            }else if (cells[x][y].get_color() > 13 && cells[x][y].get_color() < 20){ // bonbon emballer 
+                pouvoir_emballer(x, y);
+            }
     }
-    scores = scores - 10; // car il reprend 2 fois le meme ducoup on suprime une fois le score
+    Scores::moins_score(); // car il reprend 2 fois le meme ducoup on suprime une fois le score
     cells[ horizontal[0].get_center().x/80 ][ horizontal[0].get_center().y/80 ].set_color(new_bonbon);
   }
 
@@ -568,7 +612,7 @@ void Effacer_bonbon::efface_vertical_horizontal(vector<Cell > position,int coule
                         cells[j][y].set_color(0);  }
                 }
                 stop = true;
-                score();  // augmente le score pour chaque supression 
+                Scores::score();  // augmente le score pour chaque supression 
             }
             cells[x][y].set_color(couleur_new_bonbon);
             couleur_new_bonbon = 0;
@@ -582,36 +626,9 @@ void Effacer_bonbon::efface_vertical_horizontal(vector<Cell > position,int coule
         else if (!stop){
             cells[x][y].set_color(couleur_new_bonbon);
             couleur_new_bonbon = 0;
-            score();  // augmente le score pour chaque supression 
+            Scores::score();  // augmente le score pour chaque supression 
         }
     }
-}
-
-void Effacer_bonbon::score(){
-    scores += 10;
-}
-
-int Effacer_bonbon::get_score(){
-    return scores;
-}
-
-void Effacer_bonbon::ecrire_fichier_score(){
-    string const nomFichier("meilleur_score.txt");
-    ofstream monFlux(nomFichier.c_str());
-    monFlux << scores << endl;
-}
-
-int Effacer_bonbon::lecture_fichier_score(){
-    ifstream fichier("meilleur_score.txt");
-    int jsp;
-    fichier >> jsp;
-    return jsp;
-}
-
-void Effacer_bonbon::reset_score(){
-    string const nomFichier("meilleur_score.txt");
-    ofstream monFlux(nomFichier.c_str());
-    monFlux << 0 << endl;
 }
 
 /**
@@ -860,10 +877,12 @@ void Mouvement::efface_alligner_aleatoire(){
 class Canvas: public Mouvement {
   vector<vector<int> > couleur;
   bool jouer = false;
- public:
+  int niveau = 0;
+  public:
+  
   Canvas ()
-  {
-    cree_plateau(2);
+  { 
+      cree_plateau(2);
   }
 
   void lire_fichier(const char* fichier_input); // prend un fichier pour construire plateau
@@ -874,7 +893,13 @@ class Canvas: public Mouvement {
   void mouseClick(Point mouseLoc); // VIENS DU TP
   void keyPressed(int keyCode); // VIENS DU TP
   bool get_jouer();
+  int change_niveau(int new_niveau);
 };
+
+int Canvas::change_niveau(int new_niveau){
+    niveau = new_niveau;
+    return niveau;
+}
 
 void Canvas::lire_fichier(const char* fichier_input){
     ifstream fichier(fichier_input);
@@ -993,7 +1018,7 @@ void Canvas::keyPressed(int keyCode) {
   switch (keyCode) {
 
     case 'r': // reset meilleur score
-       Effacer_bonbon::reset_score();
+       Scores::reset_score();
        break;
     case ' ': // ouvre le jeu
        jouer = true; 
@@ -1017,30 +1042,30 @@ class MainWindow : public Fl_Window{
   Canvas canvas;
  public:
   MainWindow() : Fl_Window(200, 100, windowWidth, windowHeight, "Candy crush") {
-    Fl::background(32,32,32);
+    //Fl::background(32,32,32);
     Fl::add_timeout(1.0/refreshPerSecond, Timer_CB, this);
     resizable(this);
   }
   void affiche_case_text_jeu(){
     
-    int n1 = canvas.Effacer_bonbon::get_score();
-    Text("Score", {900, 45}, 20, FL_WHITE).draw();
+    int n1 = canvas.Scores::get_score();
+    Text("Score", {900, 45}, 20).draw();
     string scorees = to_string(n1);
     TextRectangle score({900,100}, 240, 80, scorees );
     score.draw();
 
-    Text("Objctif", {900, 195}, 20, FL_WHITE).draw();
+    Text("Objctif", {900, 195}, 20).draw();
     string obj = "10 000";
     TextRectangle objectif({900,250}, 240, 80, obj );
     objectif.draw();
 
 
-    Text("Meuilleur score", {900, 345}, 20, FL_WHITE).draw();
-    int n2 = canvas.Effacer_bonbon::lecture_fichier_score();
+    Text("Meuilleur score", {900, 345}, 20).draw();
+    int n2 = canvas.Scores::lecture_fichier_score();
 
     if (n2 < n1){
         n2 = n1;
-        canvas.Effacer_bonbon::ecrire_fichier_score();
+        canvas.Scores::ecrire_fichier_score();
     }
     string meilleur_score = to_string(n2);
     TextRectangle meuilleur_score({900,400}, 240, 80, meilleur_score );
@@ -1049,45 +1074,47 @@ class MainWindow : public Fl_Window{
 
   void ecran_acceuil(){
 
-    //TextRectangle ok({0,0},windowWidth*2 , windowHeight*2 , "");
+    //TextRectangle ok({0,0},windowWidth*2 , windowHeight*2 , "", FL_BLACK, fl_rgb_color(214, 214, 214));
     //ok.draw();
-    Text("Dark Candy Crush", {windowWidth/2 , 100}, 70, FL_WHITE).draw();
-    Text("Par Arnaud Querinjean et Matias Nieto", {windowWidth/2 ,200}, 25, FL_WHITE).draw();
-    Text("Appuyer ESPACE pour jouer ", {windowWidth/2,620}, 22, FL_WHITE).draw();
-
-    Text("Meuilleur score", {windowWidth/2,windowHeight/2 + 55 }, 20, FL_WHITE).draw();
-    int n2 = canvas.Effacer_bonbon::lecture_fichier_score();
+    Text("Candy Crush", {windowWidth/2 , 100}, 70).draw();
+    Text("Par Arnaud Querinjean et Matias Nieto", {windowWidth/2 ,200}, 25).draw();
+    Text("Appuyer ESPACE pour jouer ", {windowWidth/2,620}, 22).draw();
+    Text("Meuilleur score", {windowWidth/2,310}, 20).draw();
+    int n2 = canvas.Scores::lecture_fichier_score();
     string meilleur_score = to_string(n2);
     TextRectangle meuilleur_score({windowWidth/2, windowHeight/2+10}, 240, 100, meilleur_score );
     meuilleur_score.draw();
-    Text("Appuyer r pour réinitialiser", {windowWidth/2, windowHeight/2 + 300}, 20, FL_WHITE).draw();
+    Text("Appuyer r pour réinitialiser", {windowWidth/2, 430}, 20).draw();
+    canvas.change_niveau(1);
 
 
   }
 
   void draw() override {
-      
+      Fl_Window::draw();
       ecran_acceuil();
       if (canvas.get_jouer()){
         Fl_Window::draw();
         affiche_case_text_jeu();
+       
       }
     
   }
+
   int handle(int event) override {
     switch (event) {
       case FL_MOVE:
         canvas.mouseMove(Point{Fl::event_x(), Fl::event_y()});
         return 1;
-      case FL_PUSH:
-        canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-        return 1;
+      //case FL_PUSH:
+        //canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+        //return 1;
       case FL_KEYDOWN:
         canvas.keyPressed(Fl::event_key());
         return 1;
-      //case FL_DRAG:
-        //canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-		    //return 1;
+      case FL_DRAG:
+        canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+		    return 1;
 
     }
     return 0;
@@ -1108,7 +1135,6 @@ main
 Do not edit!!!!
 
 --------------------------------------------------*/
-
 
 int main(int argc, char *argv[]) {
   srand(time(0));
