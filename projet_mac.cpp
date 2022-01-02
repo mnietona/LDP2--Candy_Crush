@@ -612,7 +612,7 @@ void Effacer_bonbon::efface_vertical_horizontal(vector<Cell > position,int coule
         if(rayer_ok){ // Si bonbon rayer dans allignement fait son piuvoir  
             for (int j = 0; j < 9; j++){
                 if (direction == "vertical"){
-                    if (cells[x][y].get_color() != 7){
+                    if (cells[x][j].get_color() != 7){
                         cells[x][j].set_color(0); }
                 }else if (direction == "horizontal"){
                     if (cells[j][y].get_color() != 7){
@@ -1224,6 +1224,7 @@ void Canvas::select_level(int niveau){
             x++;
         }
     }
+    Mouvement::print();
 }
 
 /**
