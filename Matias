@@ -325,20 +325,20 @@ int Scores::get_score(){
 }
 
 void Scores::ecrire_fichier_score(){
-    string const nomFichier("meilleur_score.txt");
+    string const nomFichier("fichier/meilleur_score.txt");
     ofstream monFlux(nomFichier.c_str());
     monFlux << scores << endl;
 }
 
 int Scores::lecture_fichier_score(){
-    ifstream fichier("meilleur_score.txt");
+    ifstream fichier("fichier/meilleur_score.txt");
     int jsp;
     fichier >> jsp;
     return jsp;
 }
 
 void Scores::reset_score(){
-    string const nomFichier("meilleur_score.txt");
+    string const nomFichier("fichier/meilleur_score.txt");
     ofstream monFlux(nomFichier.c_str());
     monFlux << 0 << endl;
 }
@@ -593,6 +593,7 @@ void Effacer_bonbon::efface(){
    
   horizontal.clear();
   vertical.clear();
+
 
 }
 
@@ -883,32 +884,34 @@ void Mouvement::efface_alligner_aleatoire(){
  */
 class Canvas: public Mouvement {
   vector<vector<int> > couleur;
+  vector< Cell *> cases;
   bool jouer = false;
-  int niveau = 0;
+  int niveau;
   public:
   
   Canvas ()
-  { 
-      cree_plateau(2);
+  {
+      cree_plateau();
   }
 
   void lire_fichier(const char* fichier_input); // prend un fichier pour construire plateau
-  void cree_plateau(int niveau); // initilaise le plateau
+  void cree_plateau(); // initilaise le plateau
   bool debut_check_horizontal(); // verifie si allignement au lancement du jeu
   bool debut_check_vertical();  // verifie si allignement au lancement du jeu
   void mouseMove(Point mouseLoc); // VIENS DU TP
   void mouseClick(Point mouseLoc); // VIENS DU TP
   void keyPressed(int keyCode); // VIENS DU TP
   bool get_jouer();
-  int change_niveau(int new_niveau);
+  void change_niveau(int new_niveau);
+  void select_level(int niveau);
 };
 
-int Canvas::change_niveau(int new_niveau){
+void Canvas::change_niveau(int new_niveau){
     niveau = new_niveau;
-    return niveau;
 }
 
 void Canvas::lire_fichier(const char* fichier_input){
+    couleur.clear();
     ifstream fichier(fichier_input);
     vector<int> couleur_fichier;
     couleur_fichier.clear();
@@ -928,42 +931,18 @@ void Canvas::lire_fichier(const char* fichier_input){
     }
 }
 
-void Canvas::cree_plateau(int niveau){ 
-  
-  switch(niveau){
-    case 1:
-      // donne couleur aleatoire
-      for (int i = 0; i < 9; i++){
-        couleur.emplace_back ();
-        for (int j = 0; j < 9; j++){
-            int fruit = rand() %(7-1) +1;
-            couleur[i].push_back(fruit); }
-      }
-      // boucle tant que 3 allignement
-      do{
-        debut_check_horizontal();
-        debut_check_vertical();
-        }while( debut_check_horizontal() && debut_check_vertical() );
-
-      break;
-    case 2:
-       lire_fichier("mur.txt");
-       break;
-    case 3:
-       lire_fichier("test.txt");
-       break;
-}
-    
-  // cree le plateau de cells
+void Canvas::cree_plateau(){ 
   for (int x = 0; x < 9; x++)
   {
     cells.emplace_back();
     for (int y = 0; y < 9; y++){
-        int fruit = couleur[x][y];
+        int fruit = 27; //couleur[x][y];
         cells[x].push_back ({{x * 80 , y * 80}, 80, 80, fruit});
       }
-  }
-    
+  } 
+  
+
+    print();
 }
 
 bool Canvas::debut_check_horizontal(){
@@ -1020,7 +999,14 @@ void Canvas::mouseClick(Point mouseLoc) {
 
 void Canvas::keyPressed(int keyCode) {
   switch (keyCode) {
-
+    case '1':
+       cases.clear();
+       select_level(1);
+       break;
+    case '2':
+       cases.clear();
+       select_level(5);
+       break;
     case 'r': // reset meilleur score
        Scores::reset_score();
        break;
@@ -1036,6 +1022,53 @@ bool Canvas::get_jouer(){
     return jouer;
 }
 
+void Canvas::select_level(int niveau){
+   
+    switch(niveau){
+        case 1:
+            couleur.clear();
+            for (int i = 0; i < 9; i++){
+            couleur.emplace_back ();
+            for (int j = 0; j < 9; j++){
+                int fruit = rand() %(7-1) +1;
+                couleur[i].push_back(fruit); }
+            }
+            // boucle tant que 3 allignement
+            do{
+            debut_check_horizontal();
+            debut_check_vertical();
+            }while( debut_check_horizontal() && debut_check_vertical() );
+            break;
+        case 2:
+            lire_fichier("fichier/niveau_2.txt");
+            break;
+        case 3:
+            lire_fichier("fichier/niveau_3.txt");
+            break;
+        case 4:
+            lire_fichier("fichier/niveau_4.txt");
+            break;
+        case 5:
+            lire_fichier("fichier/niveau_5.txt");
+            break;
+           
+    }
+
+    for (int i =0; i < 9; i++){
+        for (int j=0; j < 9; j++){
+            cases.push_back(&cells[i][j]);
+        }
+    }
+    int x=0;
+    for (int i = 0; i < 9; i++){
+        for (int j = 0; j< 9; j++){
+            int fruit = couleur[i][j];
+            cells[i][j].set_color(fruit);
+            cases[x]->set_color(fruit);
+            x++;
+        }
+    }
+}
 
 /**
  * Cree la fenetre  
@@ -1044,6 +1077,7 @@ bool Canvas::get_jouer(){
  */
 class MainWindow : public Fl_Window{
   Canvas canvas;
+  bool acceuil = true;
  public:
   MainWindow() : Fl_Window(200, 100, windowWidth, windowHeight, "Candy crush") {
     //Fl::background(32,32,32);
@@ -1074,7 +1108,6 @@ class MainWindow : public Fl_Window{
     string meilleur_score = to_string(n2);
     TextRectangle meuilleur_score({900,400}, 240, 80, meilleur_score );
     meuilleur_score.draw();
-    
   }
 
   void ecran_acceuil(){
@@ -1098,9 +1131,15 @@ class MainWindow : public Fl_Window{
   void draw() override {
       //Fl_Window::draw();
       ecran_acceuil();
-      if (canvas.get_jouer()){
+      
+      if (acceuil){
+          cout << "ici" << endl;
+          acceuil = false;
+      }
+      if (canvas.get_jouer()){ // si espace toucher 
         Fl_Window::draw();
         affiche_case_text_jeu();
+
       }
   }
 
@@ -1117,11 +1156,13 @@ class MainWindow : public Fl_Window{
         return 1;
       case FL_DRAG:
         canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-		    return 1;
-
+	    return 1;
+      default :
+        
     }
     return 0;
   }
+  
   static void Timer_CB(void *userdata) {
     MainWindow *o = (MainWindow*) userdata;
     o->redraw();
