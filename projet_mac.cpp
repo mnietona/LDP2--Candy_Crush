@@ -19,6 +19,7 @@ Date de remise : 13 janvier 2021
 #include <memory>
 #include <iostream>
 #include <string.h>
+#include <mutex>
 #include <algorithm>
 #include <fstream>
 #include <stdio.h>								
@@ -250,13 +251,13 @@ void Cell::toucher(int fruit,bool s) {
 
 void Cell::explosion()
 {
-  mutex lock;
-  lock.lock();
+  mutex animation;
+  animation.lock();
   fruit = 0;
   image = &liste_bombon.find (fruit)->second[0];
   candy = new Candy (image);
   plateau->image (candy);
-  lock.unlock();
+  animation.unlock();
 }
 
 void Cell::deplace(Point d){
@@ -666,6 +667,7 @@ class Mouvement: public Effacer_bonbon{
     bool alligner_horizontal(Cell horizontal);  // verifie allignement horizontal
     bool alligner_vertical(Cell vertical);  // verifie allignement vertical
     bool alligner(Cell c); // renvoie vrai si allignement
+    void animation(); // cree animation des alligenment
     void tomber_fruits(); // fait tomber les bonbon quand allignement 
     bool verifie_pas_0(); // verfie qu'il n'y a plus de cell sans bonbon
     bool verif_mur(int x0,int y0,int x1,int y1); // verifie que un bonbon est un mur 
@@ -739,14 +741,8 @@ void Mouvement::deplacement(Cell *c){
                 Effacer_bonbon::efface();
             } 
 
-            for (int i = 0; i < 9; i++){
-              for (int j = 0; j < 9; j++){
-                if (cells[i][j].get_color() == 0){
-                  cells[i][j].explosion();
-                }
-              }
-            }
-
+            animation();
+            
             while(!verifie_pas_0()){
                 tomber_fruits();
                 efface_alligner_aleatoire();
@@ -847,6 +843,16 @@ bool Mouvement::alligner(Cell c){
 
     return res_v || res_h;
 
+}
+
+void Mouvement::animation(){
+  for (int i = 0; i < 9; i++){
+    for (int j = 0; j < 9; j++){
+      if (cells[i][j].get_color() == 0){
+        cells[i][j].explosion();
+      }
+    }
+  }
 }
 
 void Mouvement::tomber_fruits(){
@@ -1244,7 +1250,7 @@ void Canvas::select_level(int niveau){
             x++;
         }
     }
-    Mouvement::print();
+
 }
 
 /**
