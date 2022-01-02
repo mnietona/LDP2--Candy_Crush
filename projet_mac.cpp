@@ -199,6 +199,7 @@ class Cell {
   // Methodes
   void cree_bombon();  // fonction repreise sur github
   void toucher(int fruit,bool s); // animation lors du survelement de la souris sur bombon
+  void explosion();
   void deplace(Point d); // redessine le bombom a x et y 
   void mouseMove(Point mouseLoc); // la souris se deplace 
   void mouseClick(Point mouseLoc); // la souris clique 
@@ -245,6 +246,17 @@ void Cell::toucher(int fruit,bool s) {
        candy = new Candy(image);
        plateau->image(candy);
     }
+}
+
+void Cell::explosion()
+{
+  mutex lock;
+  lock.lock();
+  fruit = 0;
+  image = &liste_bombon.find (fruit)->second[0];
+  candy = new Candy (image);
+  plateau->image (candy);
+  lock.unlock();
 }
 
 void Cell::deplace(Point d){
@@ -726,7 +738,15 @@ void Mouvement::deplacement(Cell *c){
                 res_1 = alligner(cells[x1][y1]);
                 Effacer_bonbon::efface();
             } 
-            
+
+            for (int i = 0; i < 9; i++){
+              for (int j = 0; j < 9; j++){
+                if (cells[i][j].get_color() == 0){
+                  cells[i][j].explosion();
+                }
+              }
+            }
+
             while(!verifie_pas_0()){
                 tomber_fruits();
                 efface_alligner_aleatoire();
