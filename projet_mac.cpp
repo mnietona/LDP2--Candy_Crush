@@ -1161,6 +1161,9 @@ void Canvas::keyPressed(int keyCode) {
        Scores::reset_score();
        break;
     case ' ': // ouvre le jeu
+       if (niveau == 0){
+         select_level(1);
+       }
        jouer = true; 
        break;
     case 'q':
