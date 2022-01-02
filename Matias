@@ -999,14 +999,35 @@ void Canvas::mouseClick(Point mouseLoc) {
 
 void Canvas::keyPressed(int keyCode) {
   switch (keyCode) {
-    case '1':
-       cases.clear();
-       select_level(1);
-       break;
-    case '2':
-       cases.clear();
-       select_level(5);
-       break;
+    case 'a':
+        switch ( fl_choice("Quel niveau voulez vous ?", "Un", "Deux", "Trois", "Quatre", "Cinq") ) {
+            case 0: 
+                cout << "1" << endl;
+                cases.clear();
+                select_level(1);
+                break;              // One
+            case 1:
+                cout << " 2" << endl; 
+                cases.clear();
+                select_level(2);
+                break;     // Two (default)
+            case 2:
+                cout << " 3"  << endl;
+                cases.clear();
+                select_level(3);
+                break; // Three 
+            case 3:
+                cout << " 4" << endl; 
+                cases.clear();
+                select_level(4);
+                break;     // Two (default)
+            case 4:
+                cout << " 5"  << endl;
+                cases.clear();
+                select_level(5);
+                break; // Three 
+            }
+        break;
     case 'r': // reset meilleur score
        Scores::reset_score();
        break;
@@ -1131,7 +1152,6 @@ class MainWindow : public Fl_Window{
   void draw() override {
       //Fl_Window::draw();
       ecran_acceuil();
-      
       if (acceuil){
           cout << "ici" << endl;
           acceuil = false;
@@ -1139,7 +1159,6 @@ class MainWindow : public Fl_Window{
       if (canvas.get_jouer()){ // si espace toucher 
         Fl_Window::draw();
         affiche_case_text_jeu();
-
       }
   }
 
@@ -1157,7 +1176,7 @@ class MainWindow : public Fl_Window{
       case FL_DRAG:
         canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
 	    return 1;
-      default :
+
         
     }
     return 0;
