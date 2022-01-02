@@ -163,8 +163,7 @@ void Rectangle::draw() {
  * 
  * 
  */
-class TextRectangle : public Rectangle, public Text
-{
+class TextRectangle : public Rectangle, public Text{
   public:
   TextRectangle(Point center, int w, int h, string s, Fl_Color frameColor = FL_BLACK, Fl_Color fillColor = FL_WHITE) : 
   Rectangle{center, w, h,frameColor, fillColor,}, Text{s, center} {}
@@ -305,12 +304,16 @@ Point Cell::get_center() const{
 class Scores{
     int scores = 0;
     public:
+    Scores(){
+    }
     void score();
     int get_score();
     int lecture_fichier_score();
     void ecrire_fichier_score();
     void reset_score();
     void moins_score();
+    ~Scores(){
+    }
 };
 
 void Scores::score(){
@@ -355,6 +358,8 @@ class Effacer_bonbon: public Scores{
     vector<Cell > horizontal;
     vector<Cell > vertical;
     vector< vector<Cell> > cells;
+    Effacer_bonbon(){
+    }
     bool a_coter(int x0, int y0, int x1, int y1);
     bool a_coter_diagonal(int x0, int y0, int x1, int y1);
     void super_bonbon(int x1, int y1, int x0, int y0);
@@ -638,6 +643,8 @@ void Effacer_bonbon::efface_vertical_horizontal(vector<Cell > position,int coule
 class Mouvement: public Effacer_bonbon{
     vector<Cell *> liste;
     public:
+    Mouvement(){
+    }
     void print();
     void change_2_bombon(int x0, int y0, int x1, int y1);
     void echange_bonbon(vector<Cell *> &liste);
@@ -956,9 +963,6 @@ void Canvas::cree_plateau(int niveau){
         cells[x].push_back ({{x * 80 , y * 80}, 80, 80, fruit});
       }
   }
-
-
-  print();
     
 }
 
@@ -1070,12 +1074,13 @@ class MainWindow : public Fl_Window{
     string meilleur_score = to_string(n2);
     TextRectangle meuilleur_score({900,400}, 240, 80, meilleur_score );
     meuilleur_score.draw();
+    
   }
 
   void ecran_acceuil(){
 
-    //TextRectangle ok({0,0},windowWidth*2 , windowHeight*2 , "", FL_BLACK, fl_rgb_color(214, 214, 214));
-    //ok.draw();
+    TextRectangle ok({0,0},windowWidth*2 , windowHeight*2 , "", FL_BLACK, fl_rgb_color(214, 214, 214));
+    ok.draw();
     Text("Candy Crush", {windowWidth/2 , 100}, 70).draw();
     Text("Par Arnaud Querinjean et Matias Nieto", {windowWidth/2 ,200}, 25).draw();
     Text("Appuyer ESPACE pour jouer ", {windowWidth/2,620}, 22).draw();
@@ -1091,14 +1096,12 @@ class MainWindow : public Fl_Window{
   }
 
   void draw() override {
-      Fl_Window::draw();
+      //Fl_Window::draw();
       ecran_acceuil();
       if (canvas.get_jouer()){
         Fl_Window::draw();
         affiche_case_text_jeu();
-       
       }
-    
   }
 
   int handle(int event) override {
