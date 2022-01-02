@@ -1309,9 +1309,9 @@ void MainWindow::affiche_case_text_jeu(){
     TextRectangle score({900,100}, 240, 80, scorees );
     score.draw();
 
-    Text("Objectif", {900, 195}, 20).draw();
+    Text("Objectif", {900, 200}, 20).draw();
     string obj = "6 000";
-    TextRectangle objectif({900,250}, 240, 80, obj );
+    TextRectangle objectif({900,275}, 240, 90, obj );
     objectif.draw();
 
 
