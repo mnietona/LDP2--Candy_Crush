@@ -639,7 +639,7 @@ void Effacer_bonbon::efface_vertical_horizontal(vector<Cell > position,int coule
 }
 
 /**
- * 
+ * fait les mouvement si possible 
  * 
  */
 class Mouvement: public Effacer_bonbon{
