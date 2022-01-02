@@ -1,13 +1,9 @@
-/**
- * 
- * 1 = bleu
- * 2 = rouge.png
- * 3 = vert
- * 4 = jaune
- * 5 = orange
- * 6 = mauve  
- * 
- */
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
 
 #include <FL/fl_ask.H>
 #include <FL/Fl_Double_Window.H>
@@ -29,7 +25,6 @@
 #include <stdlib.h>	
 
 using namespace std;
-
 const int windowWidth = 1080;
 const int windowHeight = 720;
 const double refreshPerSecond = 60;
@@ -88,7 +83,8 @@ Candy::Candy (const char *filename) : Fl_PNG_Image(filename){}
 //################## REPRIS SUR GITHUB #############
 
 /**
- *
+ * Class repris du Labo 3
+ * Elle permet d'ecrire du texte sur l'ecran
  * 
  */
 class Text {
@@ -135,8 +131,8 @@ void Text::draw() {
  
 
 /**
- * 
- * 
+ * Class repris du Labo 2 
+ * Permet de cree un rectangle sur l'ecran
  */
 class Rectangle {
   Point center;
@@ -160,8 +156,8 @@ void Rectangle::draw() {
 
 
 /**
- * 
- * 
+ * Class repris du Labo 10
+ * Pemret de cree un rectangle avec une du texte a l'interieur
  */
 class TextRectangle : public Rectangle, public Text{
   public:
@@ -179,7 +175,7 @@ void TextRectangle::draw() {
 
 /**
  * 
- * 
+ *  Dessine un bonbon sur l'ecran 
  */
 class Cell {
 
@@ -298,7 +294,7 @@ Point Cell::get_center() const{
 
 
 /**
- * 
+ *  Cree un score 
  * 
  */
 class Scores{
@@ -306,14 +302,13 @@ class Scores{
     public:
     Scores(){
     }
-    void score();
-    int get_score();
-    int lecture_fichier_score();
-    void ecrire_fichier_score();
-    void reset_score();
-    void moins_score();
-    ~Scores(){
-    }
+    void score(); // augmente le score de 10
+    int get_score(); // renvoi le score
+    int lecture_fichier_score(); // lit le meilleur score 
+    void ecrire_fichier_score(); // ecrit le meilleur score dans le fichier 
+    void reset_score(); // remet le meilleur score a 0
+    void moins_score(); // diminue le score de 10
+    void score_egale_0(); // remet le score a 0
 };
 
 void Scores::score(){
@@ -347,29 +342,32 @@ void Scores::moins_score(){
     scores-=10;
 }
 
-
+void Scores::score_egale_0(){
+    scores = 0;
+}
 
 /**
- * 
+ *  Permet d'effacer et de cree les bonbon speciaux
  * 
  */
 class Effacer_bonbon: public Scores{
+    
     public:
     vector<Cell > horizontal;
     vector<Cell > vertical;
     vector< vector<Cell> > cells;
     Effacer_bonbon(){
     }
-    bool a_coter(int x0, int y0, int x1, int y1);
-    bool a_coter_diagonal(int x0, int y0, int x1, int y1);
-    void super_bonbon(int x1, int y1, int x0, int y0);
-    void pouvoir_rayer(int sauve);
-    void pouvoir_emballer(int x, int y);
-    void condition_super_bonbon(int i, int j, int x, int y, int sauve);
-    void efface();
-    int couleur_special(vector<Cell > position, int couleur_new_bonbon );
-    void couleur_bonbon_emballer(); 
-    void efface_vertical_horizontal(vector<Cell > position,int couleur_new_bonbon, string direction);
+    bool a_coter(int x0, int y0, int x1, int y1); // verifie que 2 bonbon sont l'un a coter de l'autre 
+    bool a_coter_diagonal(int x0, int y0, int x1, int y1); // verifie que 2 bonbon sont l'un a coter de l'autre  en diagonal
+    void super_bonbon(int x1, int y1, int x0, int y0); // si un super bonbon est selectionner fait son pouvoir ( 5 alligner )
+    void pouvoir_rayer(int sauve); // pouvoir du bonbon rayer ( 4 alligner )
+    void pouvoir_emballer(int x, int y); // pouvoir du bonbon emballer ( L ou T )
+    void condition_super_bonbon(int i, int j, int x, int y, int sauve); // permet de garder les couleur du bonbon qui doivent etre effacer 
+    void efface(); // efface les allognement 
+    int couleur_special(vector<Cell > position, int couleur_new_bonbon ); // cree bonbon special pour les allignements
+    void couleur_bonbon_emballer();  // cree bonbon emballer 
+    void efface_vertical_horizontal(vector<Cell > position,int couleur_new_bonbon, string direction); // efface tt les allignements
 };
 
 bool Effacer_bonbon:: a_coter(int x0, int y0, int x1, int y1){
@@ -546,6 +544,10 @@ void Effacer_bonbon::couleur_bonbon_emballer(){
     
     int ancien = vertical[0].get_color();
     int new_bonbon =  ancien+13;
+    if (ancien > 7){
+        new_bonbon = ancien;
+    }
+    
 
     for (unsigned long int i = 0; i < horizontal.size(); i++){
         int x = horizontal[i].get_center().x/80;
@@ -593,7 +595,6 @@ void Effacer_bonbon::efface(){
    
   horizontal.clear();
   vertical.clear();
-
 
 }
 
@@ -646,19 +647,20 @@ class Mouvement: public Effacer_bonbon{
     public:
     Mouvement(){
     }
-    void print();
-    void change_2_bombon(int x0, int y0, int x1, int y1);
-    void echange_bonbon(vector<Cell *> &liste);
-    void deplacement(Cell *c); 
-    bool alligner_horizontal(Cell horizontal); 
-    bool alligner_vertical(Cell vertical); 
-    bool alligner(Cell c);
-    void tomber_fruits();
-    bool verifie_pas_0();
-    bool verif_mur(int x0,int y0,int x1,int y1);
-    void efface_alligner_aleatoire();
+    void print(); // print dans le terminal notre jeux 
+    void change_2_bombon(int x0, int y0, int x1, int y1); // change 2 bonbon de position 
+    void echange_bonbon(vector<Cell *> &liste); // change 2 bonbon de position dasn fltk 
+    void deplacement(Cell *c); // dmouvement des bonbon selectionner 
+    bool alligner_horizontal(Cell horizontal);  // verifie allignement horizontal
+    bool alligner_vertical(Cell vertical);  // verifie allignement vertical
+    bool alligner(Cell c); // renvoie vrai si allignement
+    void tomber_fruits(); // fait tomber les bonbon quand allignement 
+    bool verifie_pas_0(); // verfie qu'il n'y a plus de cell sans bonbon
+    bool verif_mur(int x0,int y0,int x1,int y1); // verifie que un bonbon est un mur 
+    void efface_alligner_aleatoire(); // verifie qu'il y a des alignement et les suprimes
+    bool verifie_mouvement_possible_officiel(); // verifie qu'il y a toujours des mouvement possible
+    void reset_plateau(); // change les bonbon normaux de couleur
 
-    
 };
 
 void Mouvement::print(){
@@ -877,15 +879,107 @@ void Mouvement::efface_alligner_aleatoire(){
     }
 }
 
+bool Mouvement::verifie_mouvement_possible_officiel(){
+  for (int i = 1; i < 8; i++){
+      for (int j = 1; j< 8; j++){
+        liste.clear();
+        horizontal.clear();
+        vertical.clear();
+        liste.push_back(&cells[i][j]);
+        liste.push_back(&cells[i+1][j]);
+        change_2_bombon( i, j,i+1 ,j);
+        echange_bonbon(liste);
+        if(alligner(cells[i][j])){
+          change_2_bombon( i+1, j,i ,j);
+          echange_bonbon(liste);
+          liste.clear();
+          return true;
+        }
+        change_2_bombon( i+1, j,i ,j);
+        echange_bonbon(liste);
+        liste.clear();
+        /////////////////////////////////////////////////////////////
+        horizontal.clear();
+        vertical.clear();
+        liste.push_back(&cells[i][j]);
+        liste.push_back(&cells[i-1][j]);
+        change_2_bombon( i, j, i-1 ,j);
+        echange_bonbon(liste);
+        if (alligner(cells[i][j])){
+          change_2_bombon( i-1, j,i ,j);
+        echange_bonbon(liste);
+        liste.clear();
+          return true;
+        }
+        change_2_bombon( i-1, j,i ,j);
+        echange_bonbon(liste);
+        liste.clear();
+        /////////////////////////////////////////////////////////////
+        liste.push_back(&cells[i][j]);
+        liste.push_back(&cells[i][j-1]);
+        horizontal.clear();
+        vertical.clear();
+        change_2_bombon( i, j,i ,j-1);
+        echange_bonbon(liste);
+        if (alligner(cells[i][j])){
+          change_2_bombon( i, j-1,i ,j);
+          echange_bonbon(liste);
+          liste.clear();
+          return true;
+        }
+        change_2_bombon( i, j-1,i ,j);
+        echange_bonbon(liste);
+        liste.clear();
+        /////////////////////////////////////////////////////////////
+        liste.push_back(&cells[i][j]);
+        liste.push_back(&cells[i][j+1]);
+        horizontal.clear();
+        vertical.clear();
+        change_2_bombon( i, j,i ,j+1);
+        echange_bonbon(liste);
+        if (alligner(cells[i][j])){
+          change_2_bombon( i, j+1,i ,j);
+          echange_bonbon(liste);
+          liste.clear();
+          return true;
+        }
+        change_2_bombon( i, j+1,i ,j);
+        echange_bonbon(liste);
+        /////////////////////////////////////////////////////////////
+        liste.clear();
+        horizontal.clear();
+        vertical.clear();
+     }
+    
+   }
+   return false;
+}
+
+void Mouvement::reset_plateau(){
+  for (int i= 0; i < 9; i++){
+       for (int j = 1; j < 9; j++){
+           if (cells[i][j].get_color() < 7){
+               int fruit = rand() %(6-1) + 1;
+               cells[i][j].set_color(fruit);
+           }
+       }
+  }
+  do{
+    tomber_fruits();
+    efface_alligner_aleatoire();
+    }while(!verifie_pas_0());
+}
 
 /**
- * 
+ * La class permet de cree le plateau de jeux au complet
  * 
  */
-class Canvas: public Mouvement {
+class Canvas: public Mouvement { 
   vector<vector<int> > couleur;
   vector< Cell *> cases;
   bool jouer = false;
+  bool continuer = false; 
+  int niveau = 0;
   public:
   
   Canvas ()
@@ -897,11 +991,11 @@ class Canvas: public Mouvement {
   void cree_plateau(); // initilaise le plateau
   bool debut_check_horizontal(); // verifie si allignement au lancement du jeu
   bool debut_check_vertical();  // verifie si allignement au lancement du jeu
-  void mouseMove(Point mouseLoc); // VIENS DU TP
-  void mouseClick(Point mouseLoc); // VIENS DU TP
-  void keyPressed(int keyCode); // VIENS DU TP
-  bool get_jouer();
-  void select_level(int niveau);
+  void mouseMove(Point mouseLoc); // vois qu'elle bonbon on touche
+  void mouseClick(Point mouseLoc); // permet les mouvement
+  void keyPressed(int keyCode); // touche pour lancer le jeux et options 
+  bool get_jouer(); // renvoi la valeur de jouer
+  void select_level(int niveau); // cree le niveau demander
 };
 
 void Canvas::lire_fichier(const char* fichier_input){
@@ -934,9 +1028,6 @@ void Canvas::cree_plateau(){
         cells[x].push_back ({{x * 80 , y * 80}, 80, 80, fruit});
       }
   } 
-  
-
-    print();
 }
 
 bool Canvas::debut_check_horizontal(){
@@ -976,56 +1067,94 @@ bool Canvas::debut_check_vertical(){
 }
 
 void Canvas::mouseMove(Point mouseLoc) {
-  for (auto &v: cells)
-    for (auto &c: v){
-      c.mouseMove(mouseLoc);
-    }
+    for (auto &v: cells)
+        for (auto &c: v){
+            c.mouseMove(mouseLoc);
+        }
 }
 
 void Canvas::mouseClick(Point mouseLoc) {
-  
+
   for (auto &v: cells)
     for (auto &c: v){
         c.mouseClick (mouseLoc);
         Mouvement::deplacement(&c);
     }
+
+   if (Scores::get_score() >= 6000 && !continuer){
+      switch (fl_ask("Vous avez atteint l'objectif, Félicitation !\n\nVoulez vous passez au niveau suivant?")){
+        case 0:
+            continuer = true;
+            break;
+        case 1:
+            Scores::score_egale_0();
+            cases.clear();
+            if (niveau != 6){
+                select_level(niveau+1);
+                niveau +=1;
+            }else{
+                fl_message("Vous avez reussi le dernier niveau");
+            }
+            break;
+        }
+    }
+
+
 }
 
 void Canvas::keyPressed(int keyCode) {
   switch (keyCode) {
+    case 'a': // vérifie si aucun mouvement
+       if (!Mouvement::verifie_mouvement_possible_officiel()){
+          fl_message("Plus de mouvement possible, Les bonbons vont être remplacé");
+          Mouvement::reset_plateau();
+       }else if (Mouvement::verifie_mouvement_possible_officiel()){
+           fl_message("Il y a toujours un mouvement possible");
+       }
+       break;
+
     case 'd':
-        switch ( fl_choice("Quel niveau voulez vous ?", "Cinq", "Quatre", "Trois", "Quatre", "Cinq") ) {
+        switch ( fl_choice("Quel niveau voulez vous ?", "Impossible", "Hard", "Difficile") ) {
             case 0: 
-                cout << "1" << endl;
                 cases.clear();
-                select_level(5);
+                Scores::score_egale_0();
+                select_level(6);
+                niveau = 6;
                 break;           
             case 1:
-                cout << " 2" << endl; 
                 cases.clear();
-                select_level(4);
+                Scores::score_egale_0();
+                select_level(5);
+                niveau = 5;
                 break;  
             case 2:
-                cout << " 3"  << endl;
                 cases.clear();
-                select_level(3);
+                Scores::score_egale_0();
+                select_level(4);
+                niveau = 4;
                 break; 
             }
         break;
     case 'f':
-        switch ( fl_choice("Quel niveau voulez vous ?", "Deux","Annuler", "Un") ) {
+        switch ( fl_choice("Quel niveau voulez vous ?", "Normal", "Facile","Débutant") ) {
             case 0: 
-                cout << "1" << endl;
                 cases.clear();
-                select_level(2);
-                break;  
+                Scores::score_egale_0();
+                select_level(3);
+                niveau = 3;
+                break;
             case 1:
-                break;         
-            case 2:
-                cout << " 2" << endl; 
                 cases.clear();
+                Scores::score_egale_0();
+                select_level(2);
+                niveau = 2;
+                break;   
+            case 2:
+                cases.clear();
+                Scores::score_egale_0();
                 select_level(1);
-                break; 
+                niveau = 1;
+                break;         
             }
         break;
     case 'r': // reset meilleur score
@@ -1072,6 +1201,9 @@ void Canvas::select_level(int niveau){
         case 5:
             lire_fichier("fichier/niveau_5.txt");
             break;
+        case 6:
+            lire_fichier("fichier/niveau_6.txt");
+            break;
            
     }
 
@@ -1098,55 +1230,15 @@ void Canvas::select_level(int niveau){
  */
 class MainWindow : public Fl_Window{
   Canvas canvas;
-  bool acceuil = true;
  public:
   MainWindow() : Fl_Window(200, 100, windowWidth, windowHeight, "Candy crush") {
     //Fl::background(32,32,32);
     Fl::add_timeout(1.0/refreshPerSecond, Timer_CB, this);
     resizable(this);
   }
-  void affiche_case_text_jeu(){
-    
-    int n1 = canvas.Scores::get_score();
-    Text("Score", {900, 45}, 20).draw();
-    string scorees = to_string(n1);
-    TextRectangle score({900,100}, 240, 80, scorees );
-    score.draw();
 
-    Text("Objctif", {900, 195}, 20).draw();
-    string obj = "10 000";
-    TextRectangle objectif({900,250}, 240, 80, obj );
-    objectif.draw();
-
-
-    Text("Meuilleur score", {900, 345}, 20).draw();
-    int n2 = canvas.Scores::lecture_fichier_score();
-
-    if (n2 < n1){
-        n2 = n1;
-        canvas.Scores::ecrire_fichier_score();
-    }
-    string meilleur_score = to_string(n2);
-    TextRectangle meuilleur_score({900,400}, 240, 80, meilleur_score );
-    meuilleur_score.draw();
-  }
-
-  void ecran_acceuil(){
-
-    TextRectangle ok({0,0},windowWidth*2 , windowHeight*2 , "", FL_BLACK, fl_rgb_color(214, 214, 214));
-    ok.draw();
-    Text("Candy Crush", {windowWidth/2 , 100}, 70).draw();
-    Text("Par Arnaud Querinjean et Matias Nieto", {windowWidth/2 ,200}, 25).draw();
-    Text("Appuyer ESPACE pour jouer ", {windowWidth/2,620}, 22).draw();
-    Text("Meuilleur score", {windowWidth/2,310}, 20).draw();
-    int n2 = canvas.Scores::lecture_fichier_score();
-    string meilleur_score = to_string(n2);
-    TextRectangle meuilleur_score({windowWidth/2, windowHeight/2+10}, 240, 100, meilleur_score );
-    meuilleur_score.draw();
-    Text("Appuyer R pour réinitialiser", {windowWidth/2, 430}, 20).draw();
-    canvas.change_niveau(1);
-    Text("Appuyer F pour niveau facile ou D pour niveau dure ", {windowWidth/2,650}, 15).draw();
-  }
+  void affiche_case_text_jeu(); // affiche les option, score, objetif et meilleur score
+  void ecran_acceuil(); //affiche un écran d'acceuil
 
   void draw() override {
        
@@ -1163,17 +1255,15 @@ class MainWindow : public Fl_Window{
       case FL_MOVE:
         canvas.mouseMove(Point{Fl::event_x(), Fl::event_y()});
         return 1;
-      case FL_PUSH:
-        canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-        return 1;
+      //case FL_PUSH:
+        //canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+        //return 1;
       case FL_KEYDOWN:
         canvas.keyPressed(Fl::event_key());
         return 1;
-      //case FL_DRAG:
-        //canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
-	    //return 1;
-
-        
+      case FL_DRAG: // Permet le deplacer de bonbon par glissement 
+        canvas.mouseClick(Point{Fl::event_x(), Fl::event_y()});
+	    return 1;
     }
     return 0;
   }
@@ -1185,8 +1275,57 @@ class MainWindow : public Fl_Window{
   }
 };
 
+void MainWindow::affiche_case_text_jeu(){
+    
+    int n1 = canvas.Scores::get_score();
+    Text("Score", {900, 45}, 20).draw();
+    string scorees = to_string(n1);
+    TextRectangle score({900,100}, 240, 80, scorees );
+    score.draw();
+
+    Text("Objectif", {900, 195}, 20).draw();
+    string obj = "6 000";
+    TextRectangle objectif({900,250}, 240, 80, obj );
+    objectif.draw();
 
 
+    Text("Meilleur score", {900, 345}, 20).draw();
+    int n2 = canvas.Scores::lecture_fichier_score();
+
+    if (n2 < n1){
+        n2 = n1;
+        canvas.Scores::ecrire_fichier_score();
+    }
+    string meilleur_score = to_string(n2);
+    TextRectangle meuilleur_score({900,400}, 240, 80, meilleur_score );
+    meuilleur_score.draw();
+
+    Text("Options : ", {820, 500}, 20).draw();
+    Text("A -> Plus de mouvements ?", {900, 530}, 20).draw();
+    Text("F -> Niveau facile", {900, 560}, 20).draw();
+    Text("D -> Niveau Difficile", {900, 590}, 20).draw();
+    
+
+  }
+
+void MainWindow::ecran_acceuil(){
+
+    TextRectangle ok({0,0},windowWidth*2 , windowHeight*2 , "", FL_BLACK, fl_rgb_color(214, 214, 214));
+    ok.draw();
+
+    Text("Candy Crush", {windowWidth/2 , 100}, 70).draw();
+    Text("Par Arnaud Querinjean et Matias Nieto", {windowWidth/2 ,200}, 25).draw();
+    Text("Appuyer ESPACE pour jouer ", {windowWidth/2,620}, 22).draw();
+    Text("Meuilleur score", {windowWidth/2,310}, 20).draw();
+
+    int n2 = canvas.Scores::lecture_fichier_score();
+    string meilleur_score = to_string(n2);
+    TextRectangle meuilleur_score({windowWidth/2, windowHeight/2+10}, 240, 100, meilleur_score );
+    meuilleur_score.draw();
+    
+    Text("Appuyer R pour réinitialiser", {windowWidth/2, 430}, 20).draw();
+    Text("Appuyer F pour niveau facile ou D pour niveau dure ", {windowWidth/2,650}, 15).draw();
+  }
 /*--------------------------------------------------
 
 main
