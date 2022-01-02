@@ -1,7 +1,6 @@
-CC = g++ --std='c++20' -Wall
+FLAGS=-lfltk  -Wall -std=c++17
 
-.PHONY: all
-all: $(patsubst %.cpp, %.out, $(wildcard *.cpp))
+all: lab7 
 
-%.out: %.cpp makefile
-	$(CC) $< -o $@ -lfltk -lfltk_images 
+lab7: lab7.cpp common.h polygon.h polygon.cpp canvas.cpp canvas.h
+	g++ lab7.cpp polygon.cpp common.h canvas.cpp canvas.h -o lab7 $(FLAGS)
