@@ -28,7 +28,7 @@ class Mouvement: public Effacer_bonbon{
     void efface_alligner_aleatoire(); // verifie qu'il y a des alignement et les suprimes
     bool verifie_mouvement_possible_officiel(); // verifie qu'il y a toujours des mouvement possible
     void reset_plateau(); // change les bonbon normaux de couleur
-
+    bool mouvement_verif(int a, int b, int c, int d);
 };
 
 void Mouvement::print(){
@@ -259,90 +259,6 @@ void Mouvement::efface_alligner_aleatoire(){
     }
 }
 
-bool Mouvement::verifie_mouvement_possible_officiel(){
-  for (int i = 1; i < 8; i++){
-      for (int j = 1; j< 8; j++){
-        liste.clear();
-        horizontal.clear();
-        vertical.clear();
-        liste.push_back(&cells[i][j]);
-        liste.push_back(&cells[i+1][j]);
-        change_2_bombon( i, j,i+1 ,j);
-        echange_bonbon(liste);
-        if(alligner(cells[i][j])){
-          change_2_bombon( i+1, j,i ,j);
-          echange_bonbon(liste);
-          liste.clear();
-          horizontal.clear();
-          vertical.clear();
-          return true;
-        }
-        change_2_bombon( i+1, j,i ,j);
-        echange_bonbon(liste);
-        liste.clear();
-        /////////////////////////////////////////////////////////////
-        horizontal.clear();
-        vertical.clear();
-        liste.push_back(&cells[i][j]);
-        liste.push_back(&cells[i-1][j]);
-        change_2_bombon( i, j, i-1 ,j);
-        echange_bonbon(liste);
-        if (alligner(cells[i][j])){
-          change_2_bombon( i-1, j,i ,j);
-        echange_bonbon(liste);
-        liste.clear();
-        horizontal.clear();
-          vertical.clear();
-          return true;
-        }
-        change_2_bombon( i-1, j,i ,j);
-        echange_bonbon(liste);
-        liste.clear();
-        /////////////////////////////////////////////////////////////
-        liste.push_back(&cells[i][j]);
-        liste.push_back(&cells[i][j-1]);
-        horizontal.clear();
-        vertical.clear();
-        change_2_bombon( i, j,i ,j-1);
-        echange_bonbon(liste);
-        if (alligner(cells[i][j])){
-          change_2_bombon( i, j-1,i ,j);
-          echange_bonbon(liste);
-          liste.clear();
-          horizontal.clear();
-          vertical.clear();
-          return true;
-        }
-        change_2_bombon( i, j-1,i ,j);
-        echange_bonbon(liste);
-        liste.clear();
-        /////////////////////////////////////////////////////////////
-        liste.push_back(&cells[i][j]);
-        liste.push_back(&cells[i][j+1]);
-        horizontal.clear();
-        vertical.clear();
-        change_2_bombon( i, j,i ,j+1);
-        echange_bonbon(liste);
-        if (alligner(cells[i][j])){
-          change_2_bombon( i, j+1,i ,j);
-          echange_bonbon(liste);
-          liste.clear();
-          horizontal.clear();
-          vertical.clear();
-          return true;
-        }
-        change_2_bombon( i, j+1,i ,j);
-        echange_bonbon(liste);
-        /////////////////////////////////////////////////////////////
-        liste.clear();
-        horizontal.clear();
-        vertical.clear();
-     }
-    
-   }
-   return false;
-}
-
 void Mouvement::reset_plateau(){
   for (int i= 0; i < 9; i++){
        for (int j = 1; j < 9; j++){
@@ -357,6 +273,52 @@ void Mouvement::reset_plateau(){
     efface_alligner_aleatoire();
     }while(!verifie_pas_0());
 }
+
+bool Mouvement::mouvement_verif(int a, int b, int c, int d){
+  liste.clear();
+  horizontal.clear();
+  vertical.clear();
+  liste.push_back(&cells[a][b]);
+  liste.push_back(&cells[c][d]);
+  change_2_bombon( a, b, c, d);
+  echange_bonbon(liste);
+  if(alligner(cells[a][b])){
+    change_2_bombon( c, d, a, b);
+    echange_bonbon(liste);
+    liste.clear();
+    horizontal.clear();
+    vertical.clear();
+    return true;
+  }
+  change_2_bombon( c, d, a, b);
+  echange_bonbon(liste);
+  liste.clear();
+  horizontal.clear();
+  vertical.clear();
+
+  return false;
+
+}
+
+bool Mouvement::verifie_mouvement_possible_officiel(){
+  for (int i = 1; i < 8; i++){
+      for (int j = 1; j< 8; j++){
+        if (mouvement_verif( i, j, i+1, j))
+          return true;
+
+        else if (mouvement_verif( i, j, i-1, j))
+          return true;
+
+        else if (mouvement_verif( i, j, i, j-1))
+          return true;
+        
+        else if (mouvement_verif( i, j, i, j+1))
+          return true;
+     }  
+   }
+   return false;
+}
+
 
 #endif
 
