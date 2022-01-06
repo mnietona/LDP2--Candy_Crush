@@ -1,3 +1,9 @@
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
 #include "mainwindow.h"
 
 void MainWindow::affiche_case_text_jeu(){
@@ -52,6 +58,7 @@ void MainWindow::ecran_acceuil(){
     Text("Appuyer F pour niveau facile ou D pour niveau dure ", {windowWidth/2,650}, 15).draw();
   }
 
+// permet d'afficher le jeu sur linux 
 void MainWindow::affiche_case_text_jeu_linux(){
     
     int n1 = canvas.Scores::get_score();
@@ -83,7 +90,7 @@ void MainWindow::affiche_case_text_jeu_linux(){
     
 
   }
-
+// permet d'afficher le jeu sur linux 
 void MainWindow::ecran_acceuil_linux(){
 
     TextRectangle ok({0,0},windowWidth*2 , windowHeight*2 , "", FL_BLACK, fl_rgb_color(214, 214, 214));

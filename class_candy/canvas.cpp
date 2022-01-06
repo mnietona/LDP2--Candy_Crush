@@ -1,3 +1,9 @@
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
 #include "canvas.h"
 
 void Canvas::lire_fichier(const char* fichier_input){
@@ -31,7 +37,7 @@ void Canvas::cree_plateau(){
       }
   } 
 }
-
+// check si 3 bonbons sont alligner ou plus horizontalement
 bool Canvas::debut_check_horizontal(){
     bool horizontal = false;
     for (int j= 0; j < 9; j++){
@@ -50,6 +56,7 @@ bool Canvas::debut_check_horizontal(){
    return horizontal;
 }
 
+// check si 3 bonbons sont alligner ou plus verticalement
 bool Canvas::debut_check_vertical(){
    bool vertical = false;
    for (int i= 0; i < 9; i++){
@@ -67,14 +74,14 @@ bool Canvas::debut_check_vertical(){
    }
    return vertical;
 }
-
+ 
 void Canvas::mouseMove(Point mouseLoc) {
     for (auto &v: cells)
         for (auto &c: v){
             c.mouseMove(mouseLoc);
         }
 }
-
+ 
 void Canvas::mouseClick(Point mouseLoc) {
 
   for (auto &v: cells)
@@ -82,7 +89,7 @@ void Canvas::mouseClick(Point mouseLoc) {
         c.mouseClick (mouseLoc);
         Mouvement::deplacement(&c);
     }
-
+   // permet de lire le score après chaque mouvement pour voir si objectif atteint
    if (Scores::get_score() >= 6000 && !continuer){
       switch (fl_ask("Vous avez atteint l'objectif, Félicitation !\n\nVoulez vous passez au niveau suivant?")){
         case 0:
@@ -115,7 +122,7 @@ void Canvas::keyPressed(int keyCode) {
        }
        break;
 
-    case 'd':
+    case 'd': // permet de choisir un niveau difficile
         switch ( fl_choice("Quel niveau voulez vous ?", "Impossible", "Hard", "Difficile") ) {
             case 0: 
                 cases.clear();
@@ -137,7 +144,7 @@ void Canvas::keyPressed(int keyCode) {
                 break; 
             }
         break;
-    case 'f':
+    case 'f': // permet de choisir un niveau facile
         switch ( fl_choice("Quel niveau voulez vous ?", "Normal", "Facile","Débutant") ) {
             case 0: 
                 cases.clear();
@@ -176,7 +183,7 @@ void Canvas::keyPressed(int keyCode) {
 bool Canvas::get_jouer(){
     return jouer;
 }
-
+// permet de choisir le fichier en fonction du parametre int niveau
 void Canvas::select_level(int niveau){
    
     switch(niveau){
@@ -211,7 +218,7 @@ void Canvas::select_level(int niveau){
             break;
            
     }
-
+// permet de mettre en place le plateau
     for (int i =0; i < 9; i++){
         for (int j=0; j < 9; j++){
             cases.push_back(&cells[i][j]);

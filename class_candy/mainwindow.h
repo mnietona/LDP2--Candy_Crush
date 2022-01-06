@@ -1,3 +1,9 @@
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
 #ifndef __MAINWINDOW_H
 #define __MAINWINDOW_H
 
@@ -19,8 +25,8 @@ class MainWindow : public Fl_Window{
   
   void affiche_case_text_jeu(); // affiche les option, score, objetif et meilleur score
   void ecran_acceuil(); //affiche un écran d'acceuil
-  void ecran_acceuil_linux();
-  void affiche_case_text_jeu_linux();
+  void ecran_acceuil_linux(); // permet d'afficher le jeu sur linux 
+  void affiche_case_text_jeu_linux(); // permet d'afficher le jeu sur linux 
   
   void draw() override {
        

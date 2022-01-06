@@ -1,3 +1,10 @@
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
+// viens d'un labo
 #include "rectangle.h"
 Rectangle::Rectangle(Point center, int w, int h,
                      Fl_Color frameColor,

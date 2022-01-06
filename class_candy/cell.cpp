@@ -1,3 +1,9 @@
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
 #include "cell.h"
 Cell::Cell(Point center, int w, int h, int fruit):
   center{center}, w{w}, h{h}, fruit{fruit}
@@ -37,8 +43,8 @@ void Cell::toucher(int fruit,bool s) {
 
 void Cell::explosion()
 {
-  mutex animation;
-  lock_guard lock(animation);
+  mutex animation; // cree mutex animation
+  lock_guard lock(animation); // permet de bloquer le mutex et le débloc a la fin de la fonction
   fruit = 0;
   image = &liste_bombon.find (fruit)->second[0];
   candy = new Candy (image);

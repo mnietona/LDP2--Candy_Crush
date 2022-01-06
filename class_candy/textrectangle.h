@@ -1,3 +1,9 @@
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
 #ifndef __TEXTRECTANGLE_H
 #define __TEXTRECTANGLE_H
 

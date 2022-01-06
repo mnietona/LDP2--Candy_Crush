@@ -1,3 +1,9 @@
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
 #ifndef __MOUVEMENT_H
 #define __MOUVEMENT_H
 
@@ -28,7 +34,7 @@ class Mouvement: public Effacer_bonbon{
     void efface_alligner_aleatoire(); // verifie qu'il y a des alignement et les suprimes
     bool verifie_mouvement_possible_officiel(); // verifie qu'il y a toujours des mouvement possible
     void reset_plateau(); // change les bonbon normaux de couleur
-    bool mouvement_verif(int a, int b, int c, int d);
+    bool mouvement_verif(int a, int b, int c, int d);// verifie les mouvement possible
 };
 
 

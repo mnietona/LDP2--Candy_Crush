@@ -1,3 +1,9 @@
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
 #ifndef __CELL_H
 #define __CELL_H
 
@@ -29,7 +35,7 @@ class Cell {
   // Methodes
   void cree_bombon();  // fonction repreise sur github
   void toucher(int fruit,bool s); // animation lors du survelement de la souris sur bombon
-  void explosion();
+  void explosion(); // cree animation explosion
   void deplace(Point d); // redessine le bombom a x et y 
   void mouseMove(Point mouseLoc); // la souris se deplace 
   void mouseClick(Point mouseLoc); // la souris clique 

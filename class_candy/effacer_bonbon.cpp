@@ -1,3 +1,9 @@
+/*
+Cours : INFO F 202
+Projet : Candy Crush
+Auteurs : NIETO NAVARRETE Matias, QUERINJEAN Arnaud
+Date de remise : 13 janvier 2021
+*/
 #include "effacer_bonbon.h"
 
 bool Effacer_bonbon:: a_coter(int x0, int y0, int x1, int y1){
