@@ -4,5 +4,5 @@ FICHIER= candy_crush.cpp class_candy/plateau.cpp class_candy/candy.cpp class_can
 
 all: candy_crush
 
-candy_crush: $(FICHIER)
-g++ -o candy_crush $(FICHIER) $(FLAGS)
+candy_crush: $(FICHIER)	
+	g++ -o candy_crush $(FICHIER) $(FLAGS)
