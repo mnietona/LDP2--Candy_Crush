@@ -15,10 +15,4 @@ class TextRectangle : public Rectangle, public Text{
  
 };
 
-void TextRectangle::draw() {
-  Rectangle::draw();
-  Text::draw();
-}
-
-
 #endif

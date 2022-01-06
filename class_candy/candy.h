@@ -15,8 +15,5 @@ class Candy : public Fl_PNG_Image{
 
 };
 
-Candy::Candy (const char *filename) : Fl_PNG_Image(filename){}
-
-
 
 #endif
